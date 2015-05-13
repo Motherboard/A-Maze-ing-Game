@@ -83,24 +83,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="C3rdPersonCamera.cpp" />
     <ClCompile Include="CBatchingMesh.cpp" />
     <ClCompile Include="CMaze.cpp" />
     <ClCompile Include="IrrlichtEngineInterface.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MazeGameEngine.cpp" />
     <ClCompile Include="MazeGameEventReciever.cpp" />
-    <ClCompile Include="MazePlayer.cpp" />
+    <ClCompile Include="MazePlayerModel.cpp" />
+    <ClCompile Include="MazePlayerView.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C3rdPersonCamera.h" />
     <ClInclude Include="CMaze.h" />
     <ClInclude Include="IrrlichtEngineInterface.h" />
     <ClInclude Include="irr_ptr.h" />
     <ClInclude Include="mathUtils.h" />
     <ClInclude Include="MazeGameEngine.h" />
     <ClInclude Include="MazeGameEventReciever.h" />
-    <ClInclude Include="MazePlayer.h" />
+    <ClInclude Include="MazePlayerModel.h" />
+    <ClInclude Include="MazePlayerView.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

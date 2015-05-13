@@ -1,9 +1,11 @@
 #pragma once
 #include "IrrlichtEngineInterface.h"
-#include "MazePlayer.h"
+#include "MazePlayerModel.h"
+#include "MazePlayerView.h"
 #include "MazeGameEventReciever.h"
 #include <memory>
 #include "irr_ptr.h"
+#include "CMaze.h"
 
 
 namespace irr
@@ -37,17 +39,19 @@ public:
 	void cameraPan(float in_dx, float in_dy);
 	void setCameraTargetCoordinates(float in_x, float in_y);
 	void setCameraTargetSceneNode(irr::scene::ISceneNode &in_sceneNodeToFollow);
-	//bool checkCollision(const irr::scene::ISceneNode &in_sceneNode);
 private:
 	void evolveWorld() final;
 	void buildMaze();
 	float _width, _length;
-	CMazePlayer _player;
+	CMazePlayerModel _playerModel;
+	CMazePlayerView _playerView;
 	irr::scene::ISceneNode * _mazeRootSceneNode = nullptr;
 	irr::scene::ICameraSceneNode * _camera;
 	const float _minTimeBetweenFrames = 0.016; //60 FPS
 	CMazeGameEventReciever _gameEventReciever;
 	//CMenuEventHandler _menuEventHandler;
-	irr::extra::irr_ptr<irr::scene::IMetaTriangleSelector *> _mazeTriangleSelector;
+	Maze::CMaze _mazeModel;
+	
+	//irr::extra::irr_ptr<irr::scene::IMetaTriangleSelector *> _mazeTriangleSelector;
 };
 

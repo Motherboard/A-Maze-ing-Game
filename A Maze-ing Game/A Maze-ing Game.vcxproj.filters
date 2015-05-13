@@ -27,16 +27,16 @@
     <ClCompile Include="MazeGameEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MazePlayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="MazeGameEventReciever.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C3rdPersonCamera.cpp">
+    <ClCompile Include="CBatchingMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CBatchingMesh.cpp">
+    <ClCompile Include="MazePlayerModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MazePlayerView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,19 +50,19 @@
     <ClInclude Include="MazeGameEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MazePlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="MazeGameEventReciever.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="irr_ptr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C3rdPersonCamera.h">
+    <ClInclude Include="mathUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mathUtils.h">
+    <ClInclude Include="MazePlayerModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MazePlayerView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

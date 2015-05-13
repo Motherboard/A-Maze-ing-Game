@@ -5,8 +5,37 @@
 #include <chrono>
 #include <iostream>
 #include <iomanip>
+#include <stack>
 
+std::pair<int, int> Maze::getVectorFromDirection(Maze::Direction direction)
+{
+	switch (direction)
+	{
+	case Direction::North: return std::make_pair<int, int>(0, 1);
+	case Direction::South: return std::make_pair<int, int>(0, -1);
+	case Direction::East: return std::make_pair<int, int>(1, 0);
+	case Direction::West: return std::make_pair<int, int>(-1, 0);
+	}
+}
 
+Maze::Direction Maze::getDirectionFromVector(float x, float y)
+{
+	//first determin the dominant direction:
+	if (abs(y) > abs(x))
+	{ //this is either north or south
+		if (y > 0)
+			return Direction::North;
+		else
+			return Direction::South;
+	}
+	else //either east or west
+	{
+		if (x > 0)
+			return Direction::East;
+		else
+			return Direction::West;
+	}
+}
 
 Maze::CMaze::Wall::Wall(size_t in_parentCellIdx, size_t in_neighbourCellIdx)
 {
@@ -16,19 +45,20 @@ Maze::CMaze::Wall::Wall(size_t in_parentCellIdx, size_t in_neighbourCellIdx)
 	isWallPresent = true;
 }
 
-Maze::CMaze::Cell::Cell(int in_x, int in_y, int in_groupId) : x(in_x), y(in_y), cellGroupId(in_groupId) 
+Maze::CMaze::Cell::Cell(int in_x, int in_y, size_t in_groupId) : x(in_x), y(in_y), cellGroupId(in_groupId) 
 {
-	ptrOfListOfCellInSameGroup = std::make_shared<std::list<size_t>>(1,cellGroupId);
+	//std::make_pair <size_t, std::forward_list<size_t> >(
+	ptrOfListOfCellInSameGroup = std::make_shared<std::pair<size_t, std::forward_list<size_t>>>(1, std::forward_list<size_t>{ cellGroupId });
 }
 
 Maze::CMaze::CMaze(int in_width, int in_length)
 {
-	regenerateMaze(in_width, in_length);
+	generateMaze(in_width, in_length);
 }
 
 
 //Create a minimal spanning tree in random order to produce a maze
-void Maze::CMaze::regenerateMaze(int in_width, int in_length)
+void Maze::CMaze::generateMaze(int in_width, int in_length)
 {
 	using namespace std;
 	_width = in_width;
@@ -68,12 +98,16 @@ void Maze::CMaze::regenerateMaze(int in_width, int in_length)
 		{
 			_mazeWalls[i].isWallPresent = false;
 			JoinCellGroups(parentCell, neighbourCell);
-			//drawMaze(); <- uncomment to see the building procedure in action.
+			//drawMaze(); //<- uncomment to see the building procedure in action.
 		}
 	}
+	//no need to keep the list of cells in same group - as they are all in the same group now
+	//reset the list
+	_mazeCells.front().ptrOfListOfCellInSameGroup->second.clear(); //we could also iterate over all cells and set the pointer to nullptr, but we don't care about all the pointers keeping an empty list alive...
+	_mazeCells.front().ptrOfListOfCellInSameGroup->first = 0;
 }
 
-Maze::listOfWalls_t Maze::CMaze::getMazeWalls()
+Maze::listOfWalls_t Maze::CMaze::getMazeWalls() const
 {
 	listOfWalls_t tempWallsList;
 	bool isInMiddleOfWall = false;
@@ -93,7 +127,7 @@ Maze::listOfWalls_t Maze::CMaze::getMazeWalls()
 			{
 				Cell cellOfWallBeginning = _mazeCells[_mazeWalls[startIdxOfWall].parentCellIdx];
 				Cell cellOfWallEnd = _mazeCells[_mazeWalls[wallIdx].parentCellIdx];
-				tempWallsList.push_back(
+				tempWallsList.push_front(
 					ConnectedWallSection(cellOfWallBeginning.x, cellOfWallBeginning.y, 
 					cellOfWallEnd.x + ((_mazeWalls[wallIdx].isWallPresent && x == _width - 1) ? 1 : 0), 
 					cellOfWallEnd.y)); //if the wall was ended because it's the maze edge, extend it to reach the maze's edge.
@@ -119,7 +153,7 @@ Maze::listOfWalls_t Maze::CMaze::getMazeWalls()
 				Cell cellOfWallBeginning = _mazeCells[_mazeWalls[startIdxOfWall].parentCellIdx];
 				Cell cellOfWallEnd = _mazeCells[_mazeWalls[wallIdx].parentCellIdx];
 				//same as for horizontal lines - if the line was finished by the maze's edge extend it to meet the edge.
-				tempWallsList.push_back(
+				tempWallsList.push_front(
 					ConnectedWallSection(cellOfWallBeginning.x, cellOfWallBeginning.y,
 					cellOfWallEnd.x, cellOfWallEnd.y + ((_mazeWalls[wallIdx].isWallPresent && y == _length - 1) ? 1 : 0)));
 				
@@ -132,23 +166,53 @@ Maze::listOfWalls_t Maze::CMaze::getMazeWalls()
 
 void Maze::CMaze::JoinCellGroups(Maze::CMaze::Cell &in_oneCell, Maze::CMaze::Cell &in_otherCell)
 {
+	//use pointers, so that swapping them will not actually swap the cells (just the pointers...)
 	Cell *oneCellPtr = &in_oneCell;
 	Cell *otherCellPtr = &in_otherCell;
-	if (in_otherCell.ptrOfListOfCellInSameGroup->size() > in_oneCell.ptrOfListOfCellInSameGroup->size())
+	if (in_otherCell.ptrOfListOfCellInSameGroup->first > in_oneCell.ptrOfListOfCellInSameGroup->first)
 		std::swap(oneCellPtr, otherCellPtr); //we want to walk over the smaller list.
 	auto otherCellIdx = getCellIdxFromPosition(otherCellPtr->x, otherCellPtr->y);
 	auto oneCellIdx = getCellIdxFromPosition(oneCellPtr->x, oneCellPtr->y);
-	auto tempListOfCellsToMove = otherCellPtr->ptrOfListOfCellInSameGroup;
-	for (auto cellIdx : *tempListOfCellsToMove)
+	int dx = otherCellPtr->x - oneCellPtr->x;
+	if (dx < 0) 
+	{ //other cell is to the west
+		oneCellPtr->westConnectsToCellIdx = otherCellIdx;
+		otherCellPtr->eastConnectsToCellIdx = oneCellIdx;
+	}
+	else if (dx > 0) 
+	{ //other cell is to the east
+		oneCellPtr->eastConnectsToCellIdx = otherCellIdx;
+		otherCellPtr->westConnectsToCellIdx = oneCellIdx;
+	}
+	else 
+	{
+		int dy = otherCellPtr->y - oneCellPtr->y;
+		if (dy < 0)
+		{ //other cell is to the south
+			oneCellPtr->southConnectsToCellIdx = otherCellIdx;
+			otherCellPtr->northConnectsToCellIdx = oneCellIdx;
+		}
+		else
+		{ //other cell is to the north
+			oneCellPtr->northConnectsToCellIdx = otherCellIdx;
+			otherCellPtr->southConnectsToCellIdx = oneCellIdx;
+		}
+	}
+	//since during the following iteration otherCellPtr->ptrOfListOfCellInSameGroup would be re-assigned
+	//keep a copy of the original list temporarily. At the end of this function, this list would get automatically 
+	//deallocated, since it's last shared pointer would go out of scope.
+	auto tempListOfCellsToMove = otherCellPtr->ptrOfListOfCellInSameGroup->second; 
+	for (auto cellIdx : tempListOfCellsToMove)
 	{
 		_mazeCells[cellIdx].cellGroupId = oneCellPtr->cellGroupId;
 		_mazeCells[cellIdx].ptrOfListOfCellInSameGroup = oneCellPtr->ptrOfListOfCellInSameGroup;
-		oneCellPtr->ptrOfListOfCellInSameGroup->push_back(cellIdx);
+		oneCellPtr->ptrOfListOfCellInSameGroup->second.push_front(cellIdx);
+		oneCellPtr->ptrOfListOfCellInSameGroup->first++;
 	}
 	otherCellPtr->ptrOfListOfCellInSameGroup = oneCellPtr->ptrOfListOfCellInSameGroup;
 }
 
-inline size_t Maze::CMaze::getCellIdxFromPosition(int x, int y)
+inline size_t Maze::CMaze::getCellIdxFromPosition(int x, int y) const
 {
 	return x + y*_width;
 }
@@ -156,8 +220,81 @@ inline size_t Maze::CMaze::getCellIdxFromPosition(int x, int y)
 Maze::ConnectedWallSection::ConnectedWallSection(int in_x1, int in_y1, int in_x2, int in_y2) :
 x1(in_x1), y1(in_y1), x2(in_x2), y2(in_y2) {}
 
-void Maze::CMaze::drawMaze()
+std::vector<Maze::Direction> Maze::CMaze::getAllPossibleDirectionsFromPosition(int x, int y) const
 {
+	std::vector<Maze::Direction> tempAllowedDirections;
+	if (x >= _width || x < 0 || y >= _length || y < 0)
+		return tempAllowedDirections;
+	auto cellIdx = getCellIdxFromPosition(x, y);
+	if (_mazeCells[cellIdx].eastConnectsToCellIdx >= 0)
+		tempAllowedDirections.push_back(Direction::East);
+	if (_mazeCells[cellIdx].westConnectsToCellIdx >= 0)
+		tempAllowedDirections.push_back(Direction::West);
+	if (_mazeCells[cellIdx].northConnectsToCellIdx >= 0)
+		tempAllowedDirections.push_back(Direction::North);
+	if (_mazeCells[cellIdx].southConnectsToCellIdx >= 0)
+		tempAllowedDirections.push_back(Direction::South);
+	return tempAllowedDirections;
+}
+std::vector<std::pair<int, int>> Maze::CMaze::getAllEquidistantPositionsFromPosition(int x, int y, unsigned int distance) const
+{
+	std::vector<std::pair<int, int>> tempLocationVec;
+	if (x >= _width || x < 0 || y >= _length || y < 0)
+		return tempLocationVec;
+	auto cellIdx = getCellIdxFromPosition(x, y);
+	using cellIdxAndDistance = std::pair < decltype(cellIdx), unsigned int > ;
+	std::stack <cellIdxAndDistance> unvisitedCellsInGivenDistance;
+	unsigned int currentDistance = 0;
+	do
+	{
+		if (currentDistance == distance)
+			tempLocationVec.emplace_back(_mazeCells[cellIdx].x, _mazeCells[cellIdx].y);
+		else //only add new cells to visit if currentDistance is smaller than required distance...
+		{
+			if (_mazeCells[cellIdx].eastConnectsToCellIdx >= 0)
+				unvisitedCellsInGivenDistance.emplace(_mazeCells[cellIdx].eastConnectsToCellIdx, currentDistance + 1);
+			if (_mazeCells[cellIdx].westConnectsToCellIdx >= 0)
+				unvisitedCellsInGivenDistance.emplace(_mazeCells[cellIdx].westConnectsToCellIdx, currentDistance + 1);
+			if (_mazeCells[cellIdx].northConnectsToCellIdx >= 0)
+				unvisitedCellsInGivenDistance.emplace(_mazeCells[cellIdx].northConnectsToCellIdx, currentDistance + 1);
+			if (_mazeCells[cellIdx].southConnectsToCellIdx >= 0)
+				unvisitedCellsInGivenDistance.emplace(_mazeCells[cellIdx].southConnectsToCellIdx, currentDistance + 1);
+		}
+		cellIdx = unvisitedCellsInGivenDistance.top().first;
+		currentDistance = unvisitedCellsInGivenDistance.top().second;
+		unvisitedCellsInGivenDistance.pop();
+	} while (!unvisitedCellsInGivenDistance.empty());
+	return tempLocationVec;
+}
+
+bool Maze::CMaze::isDirectionAllowedFromPosition(int x, int y, Maze::Direction direction) const
+{
+	if (x >= _width || x < 0 || y >= _length || y < 0)
+		return false;
+	auto cellIdx = getCellIdxFromPosition(x, y);
+	switch (direction)
+	{
+	case Direction::East: return _mazeCells[cellIdx].eastConnectsToCellIdx >= 0;
+	case Direction::West: return _mazeCells[cellIdx].westConnectsToCellIdx >= 0;
+	case Direction::North: return _mazeCells[cellIdx].northConnectsToCellIdx >= 0;
+	case Direction::South: return _mazeCells[cellIdx].southConnectsToCellIdx >= 0;
+	}
+}
+
+void Maze::CMaze::showPossibleExits(int x, int y)
+{
+	std::cout << "Check collision for: " << x << "," << y << " - ";
+	auto cellIdx = getCellIdxFromPosition(x, y);
+	std::cout << "cell " << cellIdx << " has the following exits: " << std::endl;
+	if (_mazeCells[cellIdx].eastConnectsToCellIdx >= 0) std::cout << "East,"; else std::cout << "-----,";
+	if (_mazeCells[cellIdx].westConnectsToCellIdx >= 0) std::cout << "West,"; else std::cout << "-----";
+	if (_mazeCells[cellIdx].northConnectsToCellIdx >= 0) std::cout << "North,"; else std::cout << "-----";
+	if (_mazeCells[cellIdx].southConnectsToCellIdx >= 0) std::cout << "South,"; else std::cout << "-----" << std::endl;
+}
+
+void Maze::CMaze::drawMaze() const
+{
+	std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@[Begin Step]@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
 	int verticalWallIdx = _length*(_width - 1);
 	for (int y = 0; y < _length; ++y)
 	{
@@ -168,12 +305,30 @@ void Maze::CMaze::drawMaze()
 			{
 				
 				if (_mazeWalls[x + (y - 1)*_width].isWallPresent)
-					std::cout << std::setw(3) << "___";
+					std::cout << std::setw(7) << "_______";
 				else
-					std::cout << std::setw(3) << "   ";
+					std::cout << std::setw(7) << "       ";
 			}
 		}
 		std::cout << std::endl;
+		//write x,y of upper cell
+		for (int x = 0; x < _width; ++x)
+		{
+			if (x > 0)
+				if (_mazeWalls[verticalWallIdx + y + (x - 1)*_length].isWallPresent)
+					std::cout << std::setw(1) << "|";
+				else
+					std::cout << std::setw(1) << " ";
+			if (_mazeCells[getCellIdxFromPosition(x, y)].southConnectsToCellIdx > 0)
+				std::cout << std::setw(3) << _mazeCells[_mazeCells[getCellIdxFromPosition(x, y)].southConnectsToCellIdx].x <<
+				std::setw(1) << "," << std::setw(2) << _mazeCells[_mazeCells[getCellIdxFromPosition(x, y)].southConnectsToCellIdx].y;
+			else
+			{
+				std::cout << std::setw(6) << "      ";
+			}
+		}
+		std::cout << std::endl;
+		//write cell id, and < or\and > if we can go left or right
 		for (int x = 0; x < _width; ++x)
 		{
 			if (x > 0)
@@ -181,8 +336,34 @@ void Maze::CMaze::drawMaze()
 					std::cout << std::setw(1) << "|";
 				else
 					std::cout << std::setw(1) << " ";
-			std::cout << std::setw(2) << _mazeCells[getCellIdxFromPosition(x, y)].cellGroupId;
+			if (_mazeCells[getCellIdxFromPosition(x, y)].westConnectsToCellIdx >= 0)
+				std::cout << std::setw(1) << "<";
+			else
+				std::cout << std::setw(1) << " ";
+			std::cout << std::setw(4) << _mazeCells[getCellIdxFromPosition(x, y)].cellGroupId;
+			if (_mazeCells[getCellIdxFromPosition(x, y)].eastConnectsToCellIdx >= 0)
+				std::cout << std::setw(1) << ">";
+			else
+				std::cout << std::setw(1) << " ";
+		}
+		std::cout << std::endl;
+		//write coordinates for going north (down)
+		for (int x = 0; x < _width; ++x)
+		{
+			if (x > 0)
+				if (_mazeWalls[verticalWallIdx + y + (x - 1)*_length].isWallPresent)
+					std::cout << std::setw(1) << "|";
+				else
+					std::cout << std::setw(1) << " ";
+			if (_mazeCells[getCellIdxFromPosition(x, y)].northConnectsToCellIdx >= 0)
+				std::cout << std::setw(3) << _mazeCells[_mazeCells[getCellIdxFromPosition(x, y)].northConnectsToCellIdx].x <<
+				std::setw(1) << "," << std::setw(2) << _mazeCells[_mazeCells[getCellIdxFromPosition(x, y)].northConnectsToCellIdx].y;
+			else
+			{
+				std::cout << std::setw(6) << "      ";
+			}
 		}
 		std::cout << std::endl;
 	}	
+	std::cout << "@@@@@@@@@@@@@@@@@@@@@@@@@@[End Step]@@@@@@@@@@@@@@@@@@@@@@@@@@" << std::endl;
 }

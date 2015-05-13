@@ -1,9 +1,9 @@
 #include "MazeGameEventReciever.h"
 #include "MazeGameEngine.h"
-#include "MazePlayer.h"
+#include "MazePlayerModel.h"
 #include "irrlicht.h"
 
-CMazeGameEventReciever::CMazeGameEventReciever(CMazeGameEngine * const in_gameEngine, CMazePlayer * const in_mazePlayer)
+CMazeGameEventReciever::CMazeGameEventReciever(CMazeGameEngine * const in_gameEngine, CMazePlayerModel * const in_mazePlayer)
 	: _parentGameEngine(in_gameEngine), _mazePlayer(in_mazePlayer)
 {
 
@@ -21,22 +21,22 @@ bool CMazeGameEventReciever::OnEvent(const irr::SEvent& event)
 		switch (event.KeyInput.Key)
 		{
 			case irr::EKEY_CODE::KEY_UP: if (event.KeyInput.PressedDown) {
-				_mazePlayer->setDirection(CMazePlayer::MovementDirection::North);
+				_mazePlayer->setDirection(Maze::Direction::North);
 			}
 									 else
 										 _mazePlayer->stop(); break;
 			case irr::EKEY_CODE::KEY_DOWN: if (event.KeyInput.PressedDown) {
-				_mazePlayer->setDirection(CMazePlayer::MovementDirection::South);
+				_mazePlayer->setDirection(Maze::Direction::South);
 			}
 										   else
 											   _mazePlayer->stop(); break;
 			case irr::EKEY_CODE::KEY_LEFT: if (event.KeyInput.PressedDown) {
-				_mazePlayer->setDirection(CMazePlayer::MovementDirection::West); 
+				_mazePlayer->setDirection(Maze::Direction::West); 
 			}
 										   else
 											   _mazePlayer->stop(); break;
 			case irr::EKEY_CODE::KEY_RIGHT: if (event.KeyInput.PressedDown) {
-				_mazePlayer->setDirection(CMazePlayer::MovementDirection::East);
+				_mazePlayer->setDirection(Maze::Direction::East);
 			}
 											else
 												_mazePlayer->stop(); break;

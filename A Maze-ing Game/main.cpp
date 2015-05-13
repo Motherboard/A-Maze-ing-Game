@@ -5,7 +5,7 @@
 int main(int argc, char * argv[])
 {
 	CMazeGameEngine game;
-	game.setMazeSize(20, 20);
+	game.setMazeSize(10, 10);
 	game.setupWorld();
 	game.startEventLoop();
 	return 0;
