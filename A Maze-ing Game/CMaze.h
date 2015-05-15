@@ -5,7 +5,7 @@
 #include <stack>
 #include <memory>
 
-namespace Maze
+namespace maze
 {
 	
 

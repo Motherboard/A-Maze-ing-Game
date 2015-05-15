@@ -17,26 +17,34 @@ namespace irr
 	}
 	class ITimer;
 }
-class CIrrlichtEngineInterface
+
+namespace irr
 {
-public:
-	CIrrlichtEngineInterface();
-	virtual ~CIrrlichtEngineInterface();
-	void startEventLoop();
-	virtual void setupWorld() = 0;
-protected:
-	void init();
-	float getTimeFromPreviousFrame();
-	virtual void evolveWorld() = 0;
-	
+	namespace extra
+	{
 
-	irr::IrrlichtDevice *_device = nullptr;
-	irr::video::IVideoDriver *_videoDriver = nullptr;
-	irr::scene::ISceneManager *_sceneManager = nullptr;
-	irr::gui::IGUIEnvironment *_guiEnvironment = nullptr;
-	irr::ITimer * _timer = nullptr;
-private:
-	unsigned int _frameTime;
+		class CIrrlichtEngineInterface
+		{
+		public:
+			CIrrlichtEngineInterface();
+			virtual ~CIrrlichtEngineInterface();
+			void startEventLoop();
+			virtual void setupWorld() = 0;
+		protected:
+			void init();
+			float getTimeFromPreviousFrame();
+			virtual void evolveWorld() = 0;
 
-};
 
+			irr::IrrlichtDevice *_device = nullptr;
+			irr::video::IVideoDriver *_videoDriver = nullptr;
+			irr::scene::ISceneManager *_sceneManager = nullptr;
+			irr::gui::IGUIEnvironment *_guiEnvironment = nullptr;
+			irr::ITimer * _timer = nullptr;
+		private:
+			unsigned int _frameTime;
+
+		};
+
+	}
+}

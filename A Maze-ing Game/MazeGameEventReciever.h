@@ -2,18 +2,24 @@
 
 #include "IEventReceiver.h"
 
-class CMazeGameEngine;
-class CMazePlayerModel;
 
-class CMazeGameEventReciever :
-	public irr::IEventReceiver
+namespace amazeinggame
 {
-public:
-	CMazeGameEventReciever(CMazeGameEngine * const in_gameEngine, CMazePlayerModel * const in_mazePlayer);
-	virtual ~CMazeGameEventReciever();
-	bool OnEvent(const irr::SEvent& event) final;
-private:
-	CMazeGameEngine * const _parentGameEngine;
-	CMazePlayerModel * const _mazePlayer;
-};
 
+	class CMazeGameEngine;
+	class CMazePlayerHumanController;
+
+	class CMazeGameEventReciever :
+		public irr::IEventReceiver
+	{
+	public:
+		CMazeGameEventReciever(CMazeGameEngine * const in_gameEngine);
+		void setPlayerController(CMazePlayerHumanController * const in_playerController);
+		virtual ~CMazeGameEventReciever();
+		bool OnEvent(const irr::SEvent& event) final;
+	private:
+		CMazeGameEngine * const _parentGameEngine;
+		CMazePlayerHumanController * _playerController;
+	};
+
+}

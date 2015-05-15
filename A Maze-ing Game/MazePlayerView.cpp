@@ -4,6 +4,10 @@
 #include <algorithm>
 #include <iostream>
 
+namespace amazeinggame
+{
+
+
 CMazePlayerView::CMazePlayerView()
 {
 }
@@ -81,7 +85,7 @@ void CMazePlayerView::addSceneNode(const CMazePlayerModel & in_mazePlayer, irr::
 	irr::scene::IAnimatedMesh * ninjaMesh = in_sceneManager->getMesh("../media/ninja.b3d");
 	auto playerState = _playerModel->getPlayerState();
 	_playerSceneNode = in_sceneManager->addAnimatedMeshSceneNode(ninjaMesh, in_parent, -1, 
-		irr::core::vector3df(playerState.x - 0.25, 0, playerState.y - 0.25),
+		irr::core::vector3df(playerState.x - 0.5, 0, playerState.y - 0.5),
 		irr::core::vector3df(), irr::core::vector3df(0.1, 0.1, 0.1));
 }
 
@@ -89,9 +93,9 @@ void CMazePlayerView::addSceneNode(const CMazePlayerModel & in_mazePlayer, irr::
 void CMazePlayerView::update(float in_deltaT)
 {
 	auto playerState = _playerModel->getPlayerState();
-	_playerSceneNode->setPosition(irr::core::vector3df(playerState.x - 0.25,0,playerState.y - 0.25)
-		+ irr::core::vector3df(playerState.speedX, 0, playerState.speedY) * in_deltaT); 
-	_playerSceneNode->setRotation(irr::core::vector3df(0, 
+	_playerSceneNode->setPosition(irr::core::vector3df(playerState.x - 0.5, 0, playerState.y - 0.5)
+		+ irr::core::vector3df(playerState.speedX, 0, playerState.speedY) * in_deltaT);
+	_playerSceneNode->setRotation(irr::core::vector3df(0,
 		playerState.currentAngle + std::min(playerState.angularSpeed * in_deltaT, playerState.remainingAngle), 0));
 	if (playerState.speedX != 0 || playerState.speedY != 0)
 	{
@@ -102,4 +106,11 @@ void CMazePlayerView::update(float in_deltaT)
 	{
 		startIdleAnimation();
 	}
+}
+
+void CMazePlayerView::setTexture(irr::video::ITexture * in_texture)
+{
+	_playerSceneNode->getMaterial(0).setTexture(0, in_texture);
+}
+
 }

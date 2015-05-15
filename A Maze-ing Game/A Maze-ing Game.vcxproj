@@ -89,6 +89,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MazeGameEngine.cpp" />
     <ClCompile Include="MazeGameEventReciever.cpp" />
+    <ClCompile Include="MazeGameWorldModel.cpp" />
+    <ClCompile Include="MazePlayerAIController.cpp" />
+    <ClCompile Include="MazePlayerControllerInterface.cpp" />
+    <ClCompile Include="MazePlayerHumanController.cpp" />
     <ClCompile Include="MazePlayerModel.cpp" />
     <ClCompile Include="MazePlayerView.cpp" />
   </ItemGroup>
@@ -99,6 +103,10 @@
     <ClInclude Include="mathUtils.h" />
     <ClInclude Include="MazeGameEngine.h" />
     <ClInclude Include="MazeGameEventReciever.h" />
+    <ClInclude Include="MazeGameWorldModel.h" />
+    <ClInclude Include="MazePlayerAIController.h" />
+    <ClInclude Include="MazePlayerControllerInterface.h" />
+    <ClInclude Include="MazePlayerHumanController.h" />
     <ClInclude Include="MazePlayerModel.h" />
     <ClInclude Include="MazePlayerView.h" />
   </ItemGroup>
