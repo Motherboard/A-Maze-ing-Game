@@ -16,7 +16,9 @@ namespace maze
 	};
 	typedef std::forward_list<ConnectedWallSection> listOfWalls_t;
 
-	enum class Direction { North, South, East, West};
+	enum class Direction { North, South, East, West, NotSet};
+
+	std::ostream & operator << (std::ostream &, Direction);
 
 	std::pair<int, int> getVectorFromDirection(Direction direction);
 	Direction getDirectionFromVector(float x, float y);

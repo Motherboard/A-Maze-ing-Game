@@ -134,9 +134,12 @@ namespace amazeinggame
 
 	void CMazePlayerModel::moveStraight(float deltaT)
 	{
-		irr::core::vector2df movementVector = _pInnerData->currentDirection * deltaT * _pInnerData->currentSpeed;
+		float stepSize = deltaT * _pInnerData->currentSpeed;
+		if (stepSize > 1)
+			stepSize = 1;
+		irr::core::vector2df movementVector = _pInnerData->currentDirection * stepSize;
 		bool shouldStop = false;
-		float newDistanceFromLastTurn = _pInnerData->distanceWalkedFromLastTurn + deltaT * _pInnerData->currentSpeed;
+		float newDistanceFromLastTurn = _pInnerData->distanceWalkedFromLastTurn + stepSize;
 		float newDistanceFromCellCenterEdge = newDistanceFromLastTurn - std::ceil(_pInnerData->distanceWalkedFromLastTurn);
 		float newDistanceFromCellWall = newDistanceFromLastTurn - std::ceil(_pInnerData->distanceWalkedFromLastTurn - _pInnerData->distanceToStopBeforeWall);
 		if ((newDistanceFromCellWall >= 0) && isAboutToCollide())

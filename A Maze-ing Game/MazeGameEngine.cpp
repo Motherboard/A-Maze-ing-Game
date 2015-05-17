@@ -27,7 +27,23 @@ namespace amazeinggame
 		_width = in_width;
 		_length = in_length;
 		std::clog << "making the maze" << std::endl;
-		_worldModel.initGameWorld(_width, _length, in_numOfHumanPlayers, in_numOfAIPlayers);
+		bool success = false;
+		int numOfTries = 0;
+		do
+		{
+			try
+			{
+				_worldModel.initGameWorld(_width, _length, in_numOfHumanPlayers, in_numOfAIPlayers);
+				success = true;
+			}
+			catch (std::exception exp)
+			{
+				++numOfTries;
+				std::cerr << exp.what() << std::endl;
+			}
+		} while (!success && numOfTries < 10);
+		if (!success)
+			throw std::exception("Failed creating game world with the current parameters");
 	}
 
 
@@ -128,9 +144,10 @@ namespace amazeinggame
 		for (int i = 0; i < numOfAIPlayers; ++i)
 		{
 			_playerViews.emplace_back();
-			auto & humanPlayerView = _playerViews.back();
-			humanPlayerView.addSceneNode(_worldModel.getAIPlayer(i), _sceneManager, _mazeRootSceneNode);
-			humanPlayerView.setTexture(textureForAIPlayer);
+			auto & AIPlayerView = _playerViews.back();
+			AIPlayerView.addSceneNode(_worldModel.getAIPlayer(i), _sceneManager, _mazeRootSceneNode);
+			AIPlayerView.setTexture(textureForAIPlayer);
+			AIPlayerView.possesCamera(_camera);
 		}
 		_device->setEventReceiver(&_gameEventReciever);
 	}

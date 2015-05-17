@@ -10,6 +10,19 @@
 namespace maze
 {
 
+	std::ostream & operator << (std::ostream &in_stream, Direction in_direction)
+	{
+		switch (in_direction)
+		{
+		case Direction::North: in_stream << "North"; break;
+		case Direction::South: in_stream << "South"; break;
+		case Direction::East: in_stream << "East"; break;
+		case Direction::West: in_stream << "West"; break;
+		default: in_stream << "Unknown";
+		}
+		return in_stream;
+	}
+
 	std::pair<int, int> getVectorFromDirection(maze::Direction direction)
 	{
 		switch (direction)
@@ -18,11 +31,14 @@ namespace maze
 		case Direction::South: return std::make_pair<int, int>(0, -1);
 		case Direction::East: return std::make_pair<int, int>(1, 0);
 		case Direction::West: return std::make_pair<int, int>(-1, 0);
+		default: return std::make_pair<int, int>(0, 0);
 		}
 	}
 
 	maze::Direction getDirectionFromVector(float x, float y)
 	{
+		if (x == y)
+			return Direction::NotSet;
 		//first determin the dominant direction:
 		if (abs(y) > abs(x))
 		{ //this is either north or south
@@ -38,6 +54,7 @@ namespace maze
 			else
 				return Direction::West;
 		}
+
 	}
 
 	CMaze::Wall::Wall(size_t in_parentCellIdx, size_t in_neighbourCellIdx)

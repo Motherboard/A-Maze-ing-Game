@@ -26,22 +26,30 @@ namespace amazeinggame
 		_maze.generateMaze(width, height);
 		unsigned int seed = std::chrono::system_clock::now().time_since_epoch().count();
 		auto randomEngine = std::default_random_engine(seed);
-		auto randomXCoord = std::uniform_int_distribution<>(0, width - 1);
-		auto randomYCoord = std::uniform_int_distribution<>(0, height - 1);
-		_finishPoint = std::make_pair<unsigned char, unsigned char>(randomXCoord(randomEngine), randomYCoord(randomEngine));
-		int playerDistanceFromFinishPoint = std::max(width, height);
-		auto possiblePlayerPlacement = _maze.getAllEquidistantPositionsFromPosition(
-			_finishPoint.first, _finishPoint.second, playerDistanceFromFinishPoint);
-		
-		while (possiblePlayerPlacement.size() < _numOfPlayers && playerDistanceFromFinishPoint < std::max(width,height)) 
+		int numOfPossiblePlacementsFound = 0;
+		int numOfTries = 0;
+		std::vector<std::pair<int, int>> possiblePlayerPlacement;
+		do
 		{
-			auto tempMorePositions = _maze.getAllEquidistantPositionsFromPosition(
-				_finishPoint.first, _finishPoint.second, ++playerDistanceFromFinishPoint);
-			possiblePlayerPlacement.insert(end(possiblePlayerPlacement), begin(tempMorePositions),end(tempMorePositions));
-		}
-		if (possiblePlayerPlacement.size() < _numOfPlayers)
-			throw std::exception("Too many players were requested - This maze is not big enough for the both of us.");
-		shuffle(begin(possiblePlayerPlacement), end(possiblePlayerPlacement), randomEngine);
+			auto randomXCoord = std::uniform_int_distribution<>(0, width - 1);
+			auto randomYCoord = std::uniform_int_distribution<>(0, height - 1);
+			_finishPoint = std::make_pair<unsigned char, unsigned char>(randomXCoord(randomEngine), randomYCoord(randomEngine));
+			int playerDistanceFromFinishPoint = std::max(width, height);
+			possiblePlayerPlacement = _maze.getAllEquidistantPositionsFromPosition(
+				_finishPoint.first, _finishPoint.second, playerDistanceFromFinishPoint);
+			
+			while (possiblePlayerPlacement.size() < _numOfPlayers && playerDistanceFromFinishPoint < std::max(width, height))
+			{
+				auto tempMorePositions = _maze.getAllEquidistantPositionsFromPosition(
+					_finishPoint.first, _finishPoint.second, ++playerDistanceFromFinishPoint);
+				possiblePlayerPlacement.insert(end(possiblePlayerPlacement), begin(tempMorePositions), end(tempMorePositions));
+			}
+			numOfPossiblePlacementsFound = possiblePlayerPlacement.size();
+			if (numOfTries > width * height)
+				throw std::exception("Too many players were requested - This maze is not big enough for the both of us.");
+		} while (numOfPossiblePlacementsFound < _numOfPlayers);
+			
+		std::shuffle(std::begin(possiblePlayerPlacement), std::end(possiblePlayerPlacement), randomEngine);
 		_players.reserve(_numOfPlayers);
 		for (int i = 0; i < _numOfPlayers; ++i)
 		{
@@ -50,8 +58,11 @@ namespace amazeinggame
 				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, _maze,
 				std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerHumanController()));
 			else
+			{
 				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, _maze,
-				std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerAIController()));
+					std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerAIController(*this)));
+
+			}
 		}
 	}
 	//void assignContollerToPlayer(unsigned char playerId ,controller );

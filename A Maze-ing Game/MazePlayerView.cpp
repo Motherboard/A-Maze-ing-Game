@@ -48,6 +48,8 @@ void CMazePlayerView::possesCamera(irr::scene::ICameraSceneNode * const in_camer
 
 void CMazePlayerView::adjustCamera()
 {
+	if (!_camera)
+		return;
 	_camera->setPosition(_playerSceneNode->getAbsolutePosition() + irr::core::vector3df(0, 5, -2));
 	_camera->setUpVector(irr::core::vector3df(0, 0, 1));
 	_camera->setTarget(_playerSceneNode->getAbsolutePosition());
