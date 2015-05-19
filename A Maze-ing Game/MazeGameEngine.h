@@ -44,6 +44,10 @@ namespace amazeinggame
 	private:
 		void evolveWorld() final;
 		void buildMaze();
+		void addFinishPoint();
+		void showWinScreen();
+		bool isMenuOpen = false;
+		bool isWinScreenShowing = false;
 		float _width, _length;
 		std::vector<CMazePlayerView> _playerViews;
 		irr::scene::ISceneNode * _mazeRootSceneNode = nullptr;

@@ -24,14 +24,23 @@ namespace amazeinggame
 		CMazePlayerAIController(const CMazeGameWorldModel & in_worldModel);
 		virtual ~CMazePlayerAIController();
 		void update(CMazePlayerModel * const in_playerModel) final;
+		//determines how far ahead the AI can look from where it is now. 
+		//The default is 3
+		void setAILevel(int in_level);
 	private:
 		maze::Direction getNextDirection(int x, int y, maze::Direction direction);
+		bool getPossibleTurns(std::array<maze::Direction, 4> &out_possibleTurns, int & out_numOfPossibleTurns, 
+			int & out_preferedDirectionIdx, maze::Direction & out_backDirectoin ,
+			int x, int y, maze::Direction in_direction, int depth = 1);
 		const CMazeGameWorldModel * _worldModel = nullptr;
 		int _prevX = -1, _prevY = -1;
 		maze::Direction _prevDirection = maze::Direction::NotSet;
 		enum class AIWalkState { Explore, Rollback } _currentWalkState = AIWalkState::Explore;
+		int _lookAheadDepth = 3; //how far can the AI look ahead to see if a direction is a viable one.
 		std::default_random_engine randomEngine;
 		std::array<int, 4> _possibleTurnIdx;
+		std::pair<int, int> _finishPoint;
+		bool isAlreadyWalking = false;
 		struct SJunction
 		{
 			SJunction(int in_x, int in_y, maze::Direction in_direction, std::shared_ptr<SJunction> in_parent = nullptr)
@@ -43,12 +52,13 @@ namespace amazeinggame
 				return std::tie(x, y, direction) < std::tie(rhs.x, rhs.y, rhs.direction);
 			}
 		};
-
+		
 		std::shared_ptr<SJunction> make_sharedJunction(int x, int y, maze::Direction direction, std::shared_ptr<SJunction> in_parent);
 		std::shared_ptr<SJunction> make_sharedJunction(const SJunction &in_other);
 		std::shared_ptr<SJunction> _lastJunctionTaken;
 		std::stack<SJunction> _turnsToBeTaken;
 		//std::set<SJunction> _turnsToBeTaken;
 		std::set <SJunction> _turnsAlreadyTaken;
+		void SJunctionDeleter(SJunction *);
 	};
 }

@@ -67,8 +67,8 @@ namespace amazeinggame
 					y - 0.5));
 			}
 		}
-		irr::extra::irr_ptr<irr::scene::IMesh *> horizontalBoundingWall(geometryCreator->createCubeMesh(irr::core::vector3df(0.9, 1, 0.1)));
-		irr::extra::irr_ptr<irr::scene::IMesh *> verticalBoundingWall(geometryCreator->createCubeMesh(irr::core::vector3df(0.1, 1, 0.9)));
+		irr::extra::irr_ptr<irr::scene::IMesh *> horizontalBoundingWall(geometryCreator->createCubeMesh(irr::core::vector3df(0.9f, 1.5f, 0.1f)));
+		irr::extra::irr_ptr<irr::scene::IMesh *> verticalBoundingWall(geometryCreator->createCubeMesh(irr::core::vector3df(0.1f, 1.5f, 0.9f)));
 		auto wallTexture = _videoDriver->getTexture("../media/t351sml.jpg");
 		horizontalBoundingWall->getMeshBuffer(0)->getMaterial().setTexture(0, wallTexture);
 		verticalBoundingWall->getMeshBuffer(0)->getMaterial().setTexture(0, wallTexture);
@@ -113,11 +113,34 @@ namespace amazeinggame
 		_mazeRootSceneNode = floorNode;
 	}
 
+	void CMazeGameEngine::addFinishPoint()
+	{
+		auto prizeLocation = _worldModel.getFinishPoint();
+		auto prizeSceneNode = _sceneManager->addBillboardSceneNode(_mazeRootSceneNode, irr::core::dimension2df(0.5f, 0.5f),
+			irr::core::vector3df(prizeLocation.first - 0.5f, 0.75f, prizeLocation.second - 0.5f));
+		prizeSceneNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+		prizeSceneNode->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
+		prizeSceneNode->setMaterialTexture(0, _videoDriver->getTexture("../media/particle.bmp"));
+		_sceneManager->addLightSceneNode(prizeSceneNode, irr::core::vector3df(), irr::video::SColorf(1.0f, 0.0f, 0.5f), 1.0f);
+		auto animator = _sceneManager->createFlyCircleAnimator(
+			irr::core::vector3df(static_cast<float>(prizeLocation.first) - 0.5f, 0.75f, static_cast<float>(prizeLocation.second) - 0.5f), 0.2f);
+		prizeSceneNode->addAnimator(animator);
+		animator->drop();
+		auto miniPrizeSceneNode = _sceneManager->addBillboardSceneNode(prizeSceneNode, irr::core::dimension2df(0.3, 0.3));
+		miniPrizeSceneNode->setMaterialFlag(irr::video::EMF_LIGHTING, false);
+		miniPrizeSceneNode->setMaterialType(irr::video::EMT_TRANSPARENT_ADD_COLOR);
+		miniPrizeSceneNode->setMaterialTexture(0, _videoDriver->getTexture("../media/portal2.bmp"));
+		animator = _sceneManager->createFlyCircleAnimator(irr::core::vector3df(), 0.15f,0.015f);
+		miniPrizeSceneNode->addAnimator(animator);
+		animator->drop();
+
+	}
+
 	void CMazeGameEngine::setupWorld()
 	{
 		_sceneManager->clear();
-		_sceneManager->addLightSceneNode(_sceneManager->getRootSceneNode(), irr::core::vector3df(5.5, 2, 5.5));
 		buildMaze();
+		addFinishPoint();
 		/*_mazeTriangleSelector.reset(_sceneManager->createMetaTriangleSelector());
 		_mazeTriangleSelector->addTriangleSelector(_mazeRootSceneNode->getTriangleSelector());
 		for (auto & child : _mazeRootSceneNode->getChildren())
@@ -126,6 +149,7 @@ namespace amazeinggame
 		}*/
 		_camera = _sceneManager->addCameraSceneNode();
 		_camera->setUpVector(irr::core::vector3df(0, 0, 1));
+		_sceneManager->addLightSceneNode(_camera, irr::core::vector3df(0, 0.5, 0), irr::video::SColorf(1.0f, 1.0f, 1.0f), 5.0f);
 		const int numOfHumanPlayers = _worldModel.getNumOfHumanPlayers(); 
 		//TODO: set player controls and name if there are more than one human player...
 		//right now there is no split screen view, and no network controller - so this engine supports only one human player
@@ -136,7 +160,6 @@ namespace amazeinggame
 			_playerViews.emplace_back();
 			auto & humanPlayerView = _playerViews.back();
 			humanPlayerView.addSceneNode(_worldModel.getHumanPlayer(0), _sceneManager, _mazeRootSceneNode);
-			humanPlayerView.possesCamera(_camera);
 			_gameEventReciever.setPlayerController(_worldModel.getHumanPlayer(0).getMazePlayerHumanController());
 		}
 		const int numOfAIPlayers = _worldModel.getNumOfAIPlayers();
@@ -147,24 +170,40 @@ namespace amazeinggame
 			auto & AIPlayerView = _playerViews.back();
 			AIPlayerView.addSceneNode(_worldModel.getAIPlayer(i), _sceneManager, _mazeRootSceneNode);
 			AIPlayerView.setTexture(textureForAIPlayer);
-			AIPlayerView.possesCamera(_camera);
 		}
+		_playerViews.front().possesCamera(_camera);
 		_device->setEventReceiver(&_gameEventReciever);
 	}
 
 	void CMazeGameEngine::evolveWorld()
 	{
 		float deltaT = getTimeFromPreviousFrame();
-		if (deltaT < _minTimeBetweenFrames) //I want max 60 FPS
+		if (!isMenuOpen)
 		{
-			_device->sleep((_minTimeBetweenFrames - deltaT) * 1000);
-			deltaT = getTimeFromPreviousFrame();
+			if (deltaT < _minTimeBetweenFrames) //I want max 60 FPS
+			{
+				_device->sleep((_minTimeBetweenFrames - deltaT) * 1000);
+				deltaT = getTimeFromPreviousFrame();
+			}
+			_worldModel.evolve(deltaT);
+			for (auto & playerView : _playerViews)
+				playerView.update(0);
 		}
-		_worldModel.evolve(deltaT);
-		for (auto & playerView : _playerViews)
-			playerView.update(0);
-		//_guiEnvironment->addStaticText()
+		if (_worldModel.isMazeGameWon())
+		{
+			showWinScreen();
+		}
+	}
 
+	void CMazeGameEngine::showWinScreen()
+	{
+		if (!isWinScreenShowing)
+		{
+			auto img = _guiEnvironment->addImage(irr::core::recti(100, 100, 700, 500));
+			img->setScaleImage(true);
+			img->setImage(_videoDriver->getTexture("../winner.png"));
+			isWinScreenShowing = true;
+		}
 	}
 
 	void CMazeGameEngine::setResulotion(int in_width, int in_height)

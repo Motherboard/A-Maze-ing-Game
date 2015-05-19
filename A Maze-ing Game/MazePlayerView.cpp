@@ -81,7 +81,7 @@ void CMazePlayerView::startRotationAnimation()
 
 
 
-void CMazePlayerView::addSceneNode(const CMazePlayerModel & in_mazePlayer, irr::scene::ISceneManager * const in_sceneManager, irr::scene::ISceneNode * const in_parent)
+irr::scene::IAnimatedMeshSceneNode * CMazePlayerView::addSceneNode(const CMazePlayerModel & in_mazePlayer, irr::scene::ISceneManager * const in_sceneManager, irr::scene::ISceneNode * const in_parent)
 {
 	_playerModel = &in_mazePlayer;
 	irr::scene::IAnimatedMesh * ninjaMesh = in_sceneManager->getMesh("../media/ninja.b3d");
@@ -89,6 +89,7 @@ void CMazePlayerView::addSceneNode(const CMazePlayerModel & in_mazePlayer, irr::
 	_playerSceneNode = in_sceneManager->addAnimatedMeshSceneNode(ninjaMesh, in_parent, -1, 
 		irr::core::vector3df(playerState.x - 0.5, 0, playerState.y - 0.5),
 		irr::core::vector3df(), irr::core::vector3df(0.1, 0.1, 0.1));
+	return _playerSceneNode;
 }
 
 
@@ -113,6 +114,11 @@ void CMazePlayerView::update(float in_deltaT)
 void CMazePlayerView::setTexture(irr::video::ITexture * in_texture)
 {
 	_playerSceneNode->getMaterial(0).setTexture(0, in_texture);
+}
+
+const irr::scene::IAnimatedMeshSceneNode * CMazePlayerView::getSceneNode() const
+{
+	return _playerSceneNode;
 }
 
 }

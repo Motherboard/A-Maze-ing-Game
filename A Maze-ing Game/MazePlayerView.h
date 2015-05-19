@@ -25,7 +25,8 @@ namespace amazeinggame
 		CMazePlayerView();
 		~CMazePlayerView();
 		void update(float in_RatioOfNextToPreviousTick);
-		void addSceneNode(const CMazePlayerModel & in_mazePlayer, irr::scene::ISceneManager * const in_sceneManager, irr::scene::ISceneNode * const parentSceneNode);
+		irr::scene::IAnimatedMeshSceneNode * addSceneNode(const CMazePlayerModel & in_mazePlayer, irr::scene::ISceneManager * const in_sceneManager, irr::scene::ISceneNode * const parentSceneNode);
+		const irr::scene::IAnimatedMeshSceneNode * getSceneNode() const;
 		void possesCamera(irr::scene::ICameraSceneNode * const in_camera);
 		void setTexture(irr::video::ITexture * in_texture);
 	private:

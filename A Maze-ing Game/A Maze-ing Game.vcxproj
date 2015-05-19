@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CameraController.cpp" />
     <ClCompile Include="CBatchingMesh.cpp" />
     <ClCompile Include="CMaze.cpp" />
     <ClCompile Include="IrrlichtEngineInterface.cpp" />
@@ -97,6 +98,7 @@
     <ClCompile Include="MazePlayerView.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CameraController.h" />
     <ClInclude Include="CMaze.h" />
     <ClInclude Include="IrrlichtEngineInterface.h" />
     <ClInclude Include="irr_ptr.h" />

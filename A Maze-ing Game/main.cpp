@@ -8,7 +8,7 @@ int main(int argc, char * argv[])
 	try
 	{
 		CMazeGameEngine game;
-		game.initWorld(20, 20, 0, 1);
+		game.initWorld(20, 20, 1, 2);
 		game.setupWorld();
 		game.startEventLoop();
 		return 0;
