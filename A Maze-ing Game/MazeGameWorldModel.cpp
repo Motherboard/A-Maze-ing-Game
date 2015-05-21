@@ -55,27 +55,34 @@ namespace amazeinggame
 		{
 			_players.emplace_back();
 			if (i < numOfHumanPlayers)
-				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, _maze,
+				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, this,
 				std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerHumanController()));
 			else
 			{
-				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, _maze,
+				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, this,
 					std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerAIController(*this)));
 
 			}
 		}
 	}
-	//void assignContollerToPlayer(unsigned char playerId ,controller );
+	
 	void CMazeGameWorldModel::evolve(float deltaT)
 	{
 		for (int playerIdx = 0; playerIdx < _numOfPlayers; ++playerIdx)
 		{
+			//if (_mazeWinnerIdx >= 0) //if there already is a winner, no reason to evolove world anymore
+			//	return;
 			auto & player = _players[playerIdx];
 			player.evolve(deltaT);
 			auto playerState = player.getPlayerState();
 			if (std::round(playerState.x) == _finishPoint.first && std::round(playerState.y) == _finishPoint.second)
-			{
+			{ //if player is standing on finish point, make him the winner
 				_mazeWinnerIdx = playerIdx;
+				for (int i = 0; i < _numOfPlayers; ++i)
+				{
+					if (i != playerIdx)
+						_players[i].setPlayerDead();
+				}
 			}
 		}
 	}

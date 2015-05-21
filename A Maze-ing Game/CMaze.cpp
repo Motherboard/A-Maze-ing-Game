@@ -311,6 +311,7 @@ namespace maze
 		case Direction::West: return _mazeCells[cellIdx].westConnectsToCellIdx >= 0;
 		case Direction::North: return _mazeCells[cellIdx].northConnectsToCellIdx >= 0;
 		case Direction::South: return _mazeCells[cellIdx].southConnectsToCellIdx >= 0;
+		default: return false; //this is for NotSet
 		}
 	}
 

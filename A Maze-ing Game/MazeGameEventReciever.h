@@ -18,8 +18,8 @@ namespace amazeinggame
 		virtual ~CMazeGameEventReciever();
 		bool OnEvent(const irr::SEvent& event) final;
 	private:
-		CMazeGameEngine * const _parentGameEngine;
-		CMazePlayerHumanController * _playerController;
+		CMazeGameEngine * const _parentGameEngine = nullptr;
+		CMazePlayerHumanController * _playerController = nullptr;
 	};
 
 }

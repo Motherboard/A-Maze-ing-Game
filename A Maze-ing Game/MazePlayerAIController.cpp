@@ -69,8 +69,8 @@ namespace amazeinggame
 			//std::cerr << "Go " << nextDir << " on " << x << "," << y << std::endl;
 			_prevDirection = nextDir;
 		}
-		/*else 
-			std::cerr << "Continue " << _prevDirection << " on " << x << "," << y << std::endl;*/
+		//else 
+		//	std::cerr << "Continue " << _prevDirection << " on " << x << "," << y << std::endl;
 	}
 
 
@@ -110,6 +110,7 @@ namespace amazeinggame
 					{
 						out_preferedDirectionIdx = out_numOfPossibleTurns; //we win!!!
 						out_possibleTurns[out_numOfPossibleTurns++] = direction;
+						//std::cerr << "[Depth: " << depth << "] " << x << "," << y << ": Spotted the finish point off to " << direction << std::endl;
 						return true;
 					}
 					if (numOfPossibleTurns > 0)
@@ -117,13 +118,15 @@ namespace amazeinggame
 						if (direction == in_direction)
 							out_preferedDirectionIdx = out_numOfPossibleTurns;
 						out_possibleTurns[out_numOfPossibleTurns++] = direction;
+						//std::cerr << "[Depth:" << depth << " ] " << x << "," << y << ":The direction " << direction << " can be taken, since it has " << numOfPossibleTurns << " Possible directions leading out of it" << std::endl;
+					}
+					else {
+						//std::cerr << "[Depth:" << depth << " ] " << x << "," << y << ": The direction " << direction << " was a dead end" << std::endl;
 					}
 				}
-				
-				
 			}
-			/*if (_turnsAlreadyTaken.find(SJunction{ x, y, direction }) != std::end(_turnsAlreadyTaken))
-				std::cerr << "<*>Ignore possible turn to " << direction << " on " << x << "," << y << std::endl;*/
+			//if (_turnsAlreadyTaken.find(SJunction{ x, y, direction }) != std::end(_turnsAlreadyTaken))
+				//std::cerr << "<*>Ignore possible turn to " << direction << " on " << x << "," << y << std::endl;
 		}
 		return false;
 	}
@@ -140,6 +143,8 @@ namespace amazeinggame
 		if (!isAlreadyWalking) //if this is the first time we walk - ignore one possible turn (we would get back to it eventually)
 		{
 			--numOfPossibleTurns;
+			//std::cerr << "First cell: ignore last option - this is the tree's root - it can be left out" << std::endl;
+			//std::cerr << "ommiting " << x << "," << y << possibleTurns[numOfPossibleTurns] << std::endl;
 			isAlreadyWalking = true;
 		}
 		if (preferableDirectionIdx >= 0)
@@ -168,14 +173,13 @@ namespace amazeinggame
 		
 		if (numOfPossibleTurns == 0) //this means there were no good turns to take - turn around, and go back to the last junction.
 		{ //this should not happen in rollback mode.
-			if (_currentWalkState == AIWalkState::Rollback)
+			//if (_currentWalkState == AIWalkState::Rollback)
 				//std::cerr << "Got lost during rollback..." << std::endl;
 			if (_turnsToBeTaken.size()) //if there is where to roll back to, rollback.
 			{
 				_currentWalkState = AIWalkState::Rollback;
 				if (_lastJunctionTaken)
 				{
-					//std::cerr << "<*>Add turn to " << _lastJunctionTaken->direction << " on " << _lastJunctionTaken->x << "," << _lastJunctionTaken->y << " to forbiden turns" << std::endl;
 					_lastJunctionTaken = nullptr;
 				}
 				else
@@ -202,12 +206,12 @@ namespace amazeinggame
 		}
 		else
 		{
-			//if (_turnsToBeTaken.top().x != x || _turnsToBeTaken.top().y != y)
-			//	std::cerr << "<<!>*<<!>>>Wanted to go back to " << _turnsToBeTaken.top().x << "," << _turnsToBeTaken.top().y <<
-			//	" but wound up in " << x << "," << y << std::endl;
-			//else
-			//	std::cerr << "Successfuly rolled back to take " << _turnsToBeTaken.top().direction << " in "
-			//	<< _turnsToBeTaken.top().x << "," << _turnsToBeTaken.top().y << std::endl;
+			/*if (_turnsToBeTaken.top().x != x || _turnsToBeTaken.top().y != y)
+				std::cerr << "<<!>*<<!>>>Wanted to go back to " << _turnsToBeTaken.top().x << "," << _turnsToBeTaken.top().y <<
+				" but wound up in " << x << "," << y << std::endl;
+			else
+				std::cerr << "Successfuly rolled back to take " << _turnsToBeTaken.top().direction << " in "
+				<< _turnsToBeTaken.top().x << "," << _turnsToBeTaken.top().y << std::endl;*/
 			auto turnToTake = _turnsToBeTaken.top().direction;
 			_lastJunctionTaken = make_sharedJunction(_turnsToBeTaken.top());
 			//std::cerr << "<*>Last junction seen was on " << x << "," << y << " - taken " << _lastJunctionTaken->direction << std::endl;

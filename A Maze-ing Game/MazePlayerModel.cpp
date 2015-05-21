@@ -1,11 +1,9 @@
 #include "MazePlayerModel.h"
-//#include "irrlicht.h"
-//#include "MazeGameEngine.h"
 #include "vector2d.h"
 #include <math.h>
 #include <iostream>
 #include <deque>
-#include "CMaze.h"
+#include "MazeGameWorldModel.h"
 #include "MazePlayerControllerInterface.h"
 #include "MazePlayerHumanController.h"
 
@@ -42,11 +40,11 @@ namespace amazeinggame
 
 	}
 
-	void CMazePlayerModel::init(int in_x, int in_y, const maze::CMaze & in_maze, 
-		std::unique_ptr<CMazePlayerControllerInterface> in_controller)
+	void CMazePlayerModel::init(int in_x, int in_y, const CMazeGameWorldModel * const in_worldModel,
+		std::unique_ptr<CMazePlayerControllerInterface> && in_controller)
 	{
 		_pInnerData->currentPosition = irr::core::vector2df(in_x, in_y);
-		_maze = &in_maze;
+		_worldModel = in_worldModel;
 		_controller = std::move(in_controller);
 	}
 
@@ -59,7 +57,7 @@ namespace amazeinggame
 	{
 		_pInnerData = std::move(other._pInnerData);
 		_name = std::move(other._name);
-		_maze = std::move(other._maze);
+		_worldModel = std::move(other._worldModel);
 	}
 
 	CMazePlayerModel::~CMazePlayerModel()
@@ -100,8 +98,16 @@ namespace amazeinggame
 		_pInnerData->currentSpeed = _pInnerData->typicalSpeed;
 		_pInnerData->isStopRequested = false;
 	}
+
+	void CMazePlayerModel::setPlayerDead()
+	{
+		_isPlayerDead = true;
+	}
+
 	void CMazePlayerModel::evolve(float deltaT)
 	{
+		if (_isPlayerDead)
+			return;
 		_controller->update(this);
 		if (0 == _pInnerData->currentSpeed)
 		{
@@ -181,8 +187,8 @@ namespace amazeinggame
 		_pInnerData->playerSceneNode->getAbsolutePosition() +
 		0.2 * _pInnerData->playerSceneNode->getBoundingBox().MinEdge.getLength() * _pInnerData->currentDirection),
 		_pInnerData->levelTriangleSelector, collisionPoint, collisionTriangle, collisionNode);*/
-		if (_maze)
-			return !(_maze->isDirectionAllowedFromPosition(std::round(_pInnerData->currentPosition.X),
+		if (_worldModel)
+			return !(_worldModel->getMaze().isDirectionAllowedFromPosition(std::round(_pInnerData->currentPosition.X),
 			std::round(_pInnerData->currentPosition.Y), _pInnerData->movementDirection));
 		else
 			return false; //if there is no maze... we can go everywhere!!!
@@ -201,11 +207,12 @@ namespace amazeinggame
 
 	CMazePlayerState CMazePlayerModel::getPlayerState() const
 	{
-		//x, y, speedX, speedY, currentAngle, angularSpeed, remainingAngle;
+		//x, y, speedX, speedY, currentAngle, angularSpeed, remainingAngle, isPlayerDead;
 		return CMazePlayerState{ _pInnerData->currentPosition.X, _pInnerData->currentPosition.Y
 			, _pInnerData->currentSpeed * _pInnerData->currentDirection.X
 			, _pInnerData->currentSpeed * _pInnerData->currentDirection.Y,
-			_pInnerData->currentAngle, _pInnerData->angularSpeed, _pInnerData->remainingAngle };
+			_pInnerData->currentAngle, _pInnerData->angularSpeed, _pInnerData->remainingAngle, 
+			_isPlayerDead };
 	}
 
 	CMazePlayerHumanController * const CMazePlayerModel::getMazePlayerHumanController() const
