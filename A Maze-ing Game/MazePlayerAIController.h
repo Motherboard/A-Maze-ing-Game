@@ -30,7 +30,7 @@ namespace amazeinggame
 		void setAILevel(int in_level);
 	private:
 		maze::Direction getNextDirection(int x, int y, maze::Direction direction);
-		bool getPossibleTurns(std::array<maze::Direction, 4> &out_possibleTurns, int & out_numOfPossibleTurns, 
+		bool getPossibleTurns(std::array<maze::Direction, 4> &out_possibleTurns, unsigned int & out_numOfPossibleTurns, 
 			int & out_preferedDirectionIdx, maze::Direction & out_backDirectoin ,
 			int x, int y, maze::Direction in_direction, int depth);
 		const CMazeGameWorldModel * _worldModel = nullptr;

@@ -15,7 +15,9 @@ namespace amazeinggame
 	void CMazePlayerHumanController::update(CMazePlayerModel * const in_playerModel)
 	{
 		if (!in_playerModel)
+		{
 			return;
+		}
 		if (_isStopRequested)
 		{
 			in_playerModel->stop();

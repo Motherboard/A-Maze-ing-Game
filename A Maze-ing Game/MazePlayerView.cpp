@@ -30,10 +30,14 @@ void CMazePlayerView::setCurrentCameraPossesor(CMazePlayerView * in_possesor, CC
 {
 	static CMazePlayerView * currentCameraPossesor(nullptr);
 	if (currentCameraPossesor != nullptr && currentCameraPossesor != in_possesor)
+	{
 		currentCameraPossesor->_camera = nullptr;
+	}
 	currentCameraPossesor = in_possesor;
 	if (currentCameraPossesor)
+	{
 		currentCameraPossesor->_camera = in_camera;
+	}
 }
 
 
@@ -45,13 +49,17 @@ void CMazePlayerView::possesCamera(CCameraController * const in_camera)
 		_camera->setTarget(_playerSceneNode->getAbsolutePosition());
 	}
 	else
-		CMazePlayerView::setCurrentCameraPossesor(nullptr,nullptr);
+	{
+		CMazePlayerView::setCurrentCameraPossesor(nullptr, nullptr);
+	}
 }
 
 void CMazePlayerView::adjustCamera()
 {
 	if (!_camera)
+	{
 		return;
+	}
 	_camera->setTarget(_playerSceneNode->getAbsolutePosition());
 }
 
@@ -59,21 +67,27 @@ void CMazePlayerView::adjustCamera()
 void CMazePlayerView::startWalkAnimation()
 {
 	if (CurrentAnimationState::Walking == _currentAnimation)
+	{
 		return;
+	}
 	_currentAnimation = CurrentAnimationState::Walking;
 	_playerSceneNode->setFrameLoop(0, 13);
 }
 void CMazePlayerView::startIdleAnimation()
 {
 	if (CurrentAnimationState::Idle == _currentAnimation)
+	{
 		return;
+	}
 	_currentAnimation = CurrentAnimationState::Idle;
 	_playerSceneNode->setFrameLoop(205, 249);
 }
 void CMazePlayerView::startRotationAnimation()
 {
 	if (CurrentAnimationState::Rotating == _currentAnimation)
+	{
 		return;
+	}
 	_currentAnimation = CurrentAnimationState::Rotating;
 	_playerSceneNode->setFrameLoop(133, 144);
 }
@@ -81,7 +95,9 @@ void CMazePlayerView::startRotationAnimation()
 void CMazePlayerView::startDropDeadAnimation()
 {
 	if (CurrentAnimationState::Dead == _currentAnimation)
+	{
 		return;
+	}
 	_currentAnimation = CurrentAnimationState::Dead;
 	_playerSceneNode->setLoopMode(false);
 	_playerSceneNode->setAnimationSpeed(10);
@@ -118,7 +134,9 @@ void CMazePlayerView::update(float in_deltaT)
 		startWalkAnimation();
 		adjustCamera();
 		if (_camera)
+		{
 			_camera->evolve(in_deltaT);
+		}
 	}
 	else
 	{

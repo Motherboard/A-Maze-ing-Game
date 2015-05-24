@@ -34,7 +34,9 @@ namespace amazeinggame
 	void CMazePlayerAIController::update(CMazePlayerModel * const in_playerModel)
 	{
 		if ( !_worldModel)
+		{	
 			return; //init was not called, can't do anything...
+		}
 		if (_worldModel->isMazeGameWon())
 		{
 			in_playerModel->stop();
@@ -46,7 +48,9 @@ namespace amazeinggame
 		{
 			//check if we're still inside the previous room
 			if (x == _prevX && y == _prevY)
+			{
 				return;
+			}
 		}
 		_prevX = x; _prevY = y;
 		auto nextDir = getNextDirection(x, y, _prevDirection); //remember to remove the _prevDirection here, it's unncessary
@@ -65,7 +69,7 @@ namespace amazeinggame
 	}
 
 
-	bool CMazePlayerAIController::getPossibleTurns(std::array<maze::Direction,4> &out_possibleTurns, int & out_numOfPossibleTurns, int & out_preferedDirectionIdx, 
+	bool CMazePlayerAIController::getPossibleTurns(std::array<maze::Direction,4> &out_possibleTurns, unsigned int & out_numOfPossibleTurns, int & out_preferedDirectionIdx, 
 		maze::Direction & out_backDirection, int x, int y, maze::Direction in_direction, int depth)
 	{
 		auto possibleDirections = _worldModel->getMaze().getAllPossibleDirectionsFromPosition(x, y);
@@ -93,7 +97,8 @@ namespace amazeinggame
 				{
 					//just look at the adjacent room.
 					//auto nextPossibleDirections = _worldModel->getMaze().getAllPossibleDirectionsFromPosition(x + directionVector.first, y + directionVector.second);
-					int numOfPossibleTurns, preferableDirectionIdx;
+					int preferableDirectionIdx;
+					unsigned int numOfPossibleTurns;
 					std::array<maze::Direction, 4> possibleTurns;
 					maze::Direction backDirection;
 					if (getPossibleTurns(possibleTurns, numOfPossibleTurns, preferableDirectionIdx, backDirection, 
@@ -107,7 +112,9 @@ namespace amazeinggame
 					if (numOfPossibleTurns > 0)
 					{	//this is a possible direction to take.
 						if (direction == in_direction)
+						{
 							out_preferedDirectionIdx = out_numOfPossibleTurns;
+						}
 						out_possibleTurns[out_numOfPossibleTurns++] = direction;
 						LOG(DEBUG) << "[Depth:" << depth << " ] " << x << "," << y << ":The direction " << direction << " can be taken, since it has " << numOfPossibleTurns << " Possible directions leading out of it" << std::endl;
 					}
@@ -117,7 +124,9 @@ namespace amazeinggame
 				}
 			}
 			if (_turnsAlreadyTaken.find(SJunction{ x, y, direction }) != std::end(_turnsAlreadyTaken))
-				LOG(DEBUG) << "<*>Ignore possible turn to " << direction << " on " << x << "," << y << std::endl;
+			{
+				LOG(DEBUG) << "<*>Ignore possible turn to " << direction << " on " << x << "," << y;
+			}
 		}
 		return false;
 	}
@@ -126,12 +135,15 @@ namespace amazeinggame
 	{
 		//check if the new room has a junction in it
 
-		int numOfPossibleTurns, preferableDirectionIdx;
+		int preferableDirectionIdx;
+		unsigned int numOfPossibleTurns;
 		std::array<maze::Direction, 4> possibleTurns;
 		maze::Direction backDirection;
 		if (getPossibleTurns(possibleTurns, numOfPossibleTurns, preferableDirectionIdx, backDirection, x, y, in_direction, _lookAheadDepth))
+		{
 			return possibleTurns[preferableDirectionIdx]; //this means we know where the target is, no need to mock about.
-		if (!isAlreadyWalking) //if this is the first time we walk - ignore one possible turn (we would get back to it eventually)
+		}
+		if (!isAlreadyWalking && numOfPossibleTurns > 1) //if this is the first time we walk - ignore one possible turn (we would get back to it eventually)
 		{
 			--numOfPossibleTurns;
 			LOG(DEBUG) << "First cell: ignore last option - this is the tree's root - it can be left out" << std::endl;
@@ -141,13 +153,15 @@ namespace amazeinggame
 		if (preferableDirectionIdx >= 0)
 		{
 			if (numOfPossibleTurns == 1) //no need to do anything yet, we're doing fine!
+			{
 				return in_direction;
+			}
 			if (_currentWalkState == AIWalkState::Explore)
 			{ //only during exploration do we care about the current direction.
 				//prefer to keep the same direction.
 
 				//insert the rest of the turns to turnsToBeTaken if they are legal
-				for (int i = 0; i < numOfPossibleTurns; ++i)
+				for (auto i = 0; i < numOfPossibleTurns; ++i)
 				{
 					if (i != preferableDirectionIdx)
 					{
@@ -175,8 +189,9 @@ namespace amazeinggame
 				{
 					_lastJunctionTaken = nullptr;
 				}
-				else
+				else {
 					_currentWalkState = AIWalkState::Explore; //we get here only if rollback failed.
+				}
 			}
 			return backDirection;
 		}
@@ -188,7 +203,7 @@ namespace amazeinggame
 		{
 			iota(std::begin(_possibleTurnIdx), std::begin(_possibleTurnIdx) + numOfPossibleTurns, 0);
 			std::shuffle(std::begin(_possibleTurnIdx), std::begin(_possibleTurnIdx) + numOfPossibleTurns, randomEngine);
-			for (int i = 0; i < numOfPossibleTurns - 1; ++i) //first check in the waiting list
+			for (auto i = 0; i < numOfPossibleTurns - 1; ++i) //first check in the waiting list
 			{
 				_turnsToBeTaken.emplace( x, y, possibleTurns[_possibleTurnIdx[i]], _lastJunctionTaken );
 				LOG(DEBUG) << "<*>Remember to go back to take " << possibleTurns[_possibleTurnIdx[i]] << " on " << x << "," << y << std::endl;
@@ -197,14 +212,18 @@ namespace amazeinggame
 			LOG(DEBUG) << "<*>Last junction seen was on " << x << "," << y << " - taken " << _lastJunctionTaken->direction << std::endl;
 			return possibleTurns[_possibleTurnIdx[numOfPossibleTurns - 1]];
 		}
-		else
+		else 
 		{
 			if (_turnsToBeTaken.top().x != x || _turnsToBeTaken.top().y != y)
+			{
 				LOG(ERROR) << "<<!>*<<!>>>Wanted to go back to " << _turnsToBeTaken.top().x << "," << _turnsToBeTaken.top().y <<
-				" but wound up in " << x << "," << y << std::endl;
+					" but wound up in " << x << "," << y;
+			}
 			else
+			{
 				LOG(DEBUG) << "Successfuly rolled back to take " << _turnsToBeTaken.top().direction << " in "
-				<< _turnsToBeTaken.top().x << "," << _turnsToBeTaken.top().y << std::endl;
+					<< _turnsToBeTaken.top().x << "," << _turnsToBeTaken.top().y;
+			}
 			auto turnToTake = _turnsToBeTaken.top().direction;
 			_lastJunctionTaken = make_sharedJunction(_turnsToBeTaken.top());
 			LOG(DEBUG) << "<*>Last junction seen was on " << x << "," << y << " - taken " << _lastJunctionTaken->direction << std::endl;

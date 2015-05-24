@@ -31,14 +31,24 @@ namespace amazeinggame
 			irr::core::vector3df currentPosition = _camera->getPosition();
 			float reminingDistance = currentPosition.getDistanceFrom(_desiredPos);
 			if (reminingDistance > 0.5 * _positionTransitionSpeed*_positionTransitionSpeed / Acceleratoin)
+			{
 				if (_positionTransitionSpeed + Acceleratoin*deltaT < MaxSpeed)
+				{
 					_positionTransitionSpeed += Acceleratoin*deltaT;
+				}
 				else
+				{
 					_positionTransitionSpeed = MaxSpeed;
+				}
+			}
 			else if (_positionTransitionSpeed - Acceleratoin*deltaT > 0)
+			{
 				_positionTransitionSpeed -= Acceleratoin*deltaT;
+			}
 			else
+			{
 				_positionTransitionSpeed = 0;
+			}
 			if (reminingDistance <= _positionTransitionSpeed * deltaT)
 			{
 				_camera->setPosition(_desiredPos);
@@ -56,14 +66,24 @@ namespace amazeinggame
 			float reminingDistance = currentTarget.getDistanceFrom(_desiredTarget);
 			//accelerate until x = 0.5v^2/a
 			if (reminingDistance > 0.5 * _targetTransitionSpeed*_targetTransitionSpeed / Acceleratoin)
+			{
 				if (_targetTransitionSpeed + Acceleratoin*deltaT < MaxSpeed)
+				{
 					_targetTransitionSpeed += Acceleratoin*deltaT;
+				}
 				else
+				{
 					_targetTransitionSpeed = MaxSpeed;
+				}
+			}
 			else if (_targetTransitionSpeed - Acceleratoin*deltaT > 0)
+			{
 				_targetTransitionSpeed -= Acceleratoin*deltaT;
+			}
 			else
+			{
 				_targetTransitionSpeed = 0;
+			}
 			if (reminingDistance <= _targetTransitionSpeed * deltaT)
 			{
 				_camera->setTarget(_desiredTarget);
@@ -111,7 +131,9 @@ namespace amazeinggame
 			setPosition(_desiredTarget - _posToTarget);
 		}
 		else
+		{
 			_posToTarget = _desiredTarget - _desiredPos;
+		}
 	}
 
 	void CCameraController::setPosition(const irr::core::vector3df &in_position, bool in_keepPositionToTargetVector)
@@ -126,7 +148,9 @@ namespace amazeinggame
 			setTarget(_desiredPos + _posToTarget,false);
 		}
 		else
+		{
 			_posToTarget = _desiredTarget - _desiredPos;
+		}
 	}
 
 

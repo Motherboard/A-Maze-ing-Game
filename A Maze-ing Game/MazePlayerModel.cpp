@@ -73,7 +73,9 @@ namespace amazeinggame
 			if (_pInnerData->currentSpeed > 0)
 			{ //if we're already moving, complete the move - and only than change direction.
 				if (_pInnerData->movementQueue.size() > 2) //forget about the earliest movement requests - the player has changed his mind.
-					_pInnerData->movementQueue.pop_front(); //we keep maximum of only 2 movements in the queue. - the movement the player would take once he's finished moving
+				{										//we keep maximum of only 2 movements in the queue. - 
+					_pInnerData->movementQueue.pop_front(); //the movement the player would take once he's finished moving
+				}
 				_pInnerData->movementQueue.push_back(in_newDirection); //and the next movement to execute.
 				return;
 			}
@@ -84,12 +86,18 @@ namespace amazeinggame
 
 			irr::core::vector2df directionChange = _pInnerData->currentDirection - _pInnerData->previousDirection;
 			if (1 < abs(directionChange.X) || 1 < abs(directionChange.Y))
+			{
 				_pInnerData->remainingAngle = std::remainder(180.0f + _pInnerData->remainingAngle, 360.0f);
+			}
 			else if (irr::core::vector2df(_pInnerData->previousDirection.Y, -_pInnerData->previousDirection.X)
 				.dotProduct(_pInnerData->currentDirection) < 0)
+			{		
 				_pInnerData->remainingAngle = std::remainder(_pInnerData->remainingAngle - 90, 360);
+			}
 			else
+			{
 				_pInnerData->remainingAngle = std::remainder(_pInnerData->remainingAngle + 90, 360);
+			}
 			_pInnerData->movementState = MovementState::Rotate;
 		}
 		else
@@ -108,7 +116,9 @@ namespace amazeinggame
 	void CMazePlayerModel::evolve(float deltaT)
 	{
 		if (_isPlayerDead)
+		{
 			return;
+		}
 		_controller->update(this);
 		if (0 == _pInnerData->currentSpeed)
 		{
@@ -116,9 +126,13 @@ namespace amazeinggame
 				return;
 		}
 		if (_pInnerData->movementState == MovementState::Rotate)
+		{
 			turn(deltaT);
+		}
 		else
+		{
 			moveStraight(deltaT);
+		}
 
 
 	}
@@ -142,7 +156,9 @@ namespace amazeinggame
 	{
 		float stepSize = deltaT * _pInnerData->currentSpeed;
 		if (stepSize > 1) //only allow to move one cell at a time, this would happen only if the frame-rate dropped dangerously low
-			stepSize = 1; //it might be irritating to "teleport" accross a corridor without being able to take a turn...
+		{					//it might be irritating to "teleport" accross a corridor without being able to take a turn...
+			stepSize = 1; 
+		}
 		irr::core::vector2df movementVector = _pInnerData->currentDirection * stepSize;
 		bool shouldStop = false;
 		float newDistanceFromLastTurn = _pInnerData->distanceWalkedFromLastTurn + stepSize;
@@ -161,7 +177,9 @@ namespace amazeinggame
 			_pInnerData->distanceWalkedFromLastTurn = 0;
 		}
 		else
+		{
 			_pInnerData->distanceWalkedFromLastTurn = newDistanceFromLastTurn;
+		}
 		_pInnerData->currentPosition += movementVector;
 		if (shouldStop) //this is here to make sure the walking animation continues up untill the last frame.
 		{
@@ -178,10 +196,14 @@ namespace amazeinggame
 	bool CMazePlayerModel::isAboutToCollide()
 	{
 		if (_worldModel)
+		{
 			return !(_worldModel->getMaze().isDirectionAllowedFromPosition(std::round(_pInnerData->currentPosition.X),
-			std::round(_pInnerData->currentPosition.Y), _pInnerData->movementDirection));
+				std::round(_pInnerData->currentPosition.Y), _pInnerData->movementDirection));
+		}
 		else
+		{
 			return false; //if there is no maze... we can go everywhere!!!
+		}
 	}
 
 	bool CMazePlayerModel::checkAndUseMovementQueue()

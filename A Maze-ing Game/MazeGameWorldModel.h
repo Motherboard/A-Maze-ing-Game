@@ -32,7 +32,7 @@ namespace amazeinggame
 		std::pair<unsigned char, unsigned char> _finishPoint;
 		unsigned char _numOfHumanPlayers;
 		int _mazeWinnerIdx = -1;
-		int _numOfPlayers;
+		unsigned int _numOfPlayers;
 	};
 
 }

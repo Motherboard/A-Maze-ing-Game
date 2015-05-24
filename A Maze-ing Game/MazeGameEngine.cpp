@@ -15,6 +15,10 @@ namespace amazeinggame
 		: _gameEventReciever(this), _menuEventReciever(this)
 	{
 		auto screenSize = _videoDriver->getScreenSize();
+		_endGameImg = _guiEnvironment->addImage(irr::core::recti(irr::core::vector2di(screenSize.Width / 4, screenSize.Height / 4), screenSize / 4));
+		_endGameImg->setVisible(false);
+		_endGameImg->setScaleImage(true);
+		_endGameImg->setColor(irr::video::SColor(200, 255, 255, 255));
 		menu.init(_guiEnvironment, irr::core::recti(
 			irr::core::vector2di(screenSize.Width / 4, screenSize.Height / 4),screenSize / 2));
 		showMenu();
@@ -49,7 +53,9 @@ namespace amazeinggame
 			}
 		} while (!success && numOfTries < 10);
 		if (!success)
+		{
 			throw std::exception("Failed creating game world with the current parameters");
+		}
 	}
 
 
@@ -64,9 +70,9 @@ namespace amazeinggame
 		irr::scene::IGeometryCreator const * geometryCreator(_sceneManager->getGeometryCreator());
 		irr::extra::irr_ptr<irr::scene::IMesh *> floorTile(geometryCreator->createPlaneMesh(irr::core::dimension2d<irr::f32>(1, 1)));
 		floorTile->getMeshBuffer(0)->getMaterial().setTexture(0, _videoDriver->getTexture("..\\media\\floor.jpg"));
-		for (int y = 0; y < _length; ++y)
+		for (unsigned int y = 0; y < _length; ++y)
 		{
-			for (int x = 0; x < _width; ++x)
+			for (unsigned int x = 0; x < _width; ++x)
 			{
 				batchingMesh->addMesh(floorTile.get(),
 					irr::core::vector3df(x - 0.5, 0,
@@ -83,12 +89,12 @@ namespace amazeinggame
 		float verticalWallOffsetX = -0.95f;
 		float verticalWallOffsetY = -0.45f;
 		//add maze bounding walls
-		for (int x = 0; x < _width; ++x)
+		for (unsigned int x = 0; x < _width; ++x)
 		{
 			batchingMesh->addMesh(horizontalBoundingWall.get(), irr::core::vector3df(x + horizontalWallOffsetX, 0, horizontalWallOffsetY));
 			batchingMesh->addMesh(horizontalBoundingWall.get(), irr::core::vector3df(x + horizontalWallOffsetX, 0, horizontalWallOffsetY + _length));
 		}
-		for (int y = 0; y < _length; ++y)
+		for (unsigned int y = 0; y < _length; ++y)
 		{
 			batchingMesh->addMesh(verticalBoundingWall.get(), irr::core::vector3df(verticalWallOffsetX, 0, y + verticalWallOffsetY));
 			batchingMesh->addMesh(verticalBoundingWall.get(), irr::core::vector3df(verticalWallOffsetX + _width, 0, y + verticalWallOffsetY));
@@ -101,13 +107,13 @@ namespace amazeinggame
 			int dy = wall.y2 - wall.y1;
 			if (dx) //check if horizontal wall
 			{
-				for (int x = 0; x < dx; ++x)
+				for (auto x = 0; x < dx; ++x)
 					batchingMesh->addMesh(horizontalBoundingWall.get(), irr::core::vector3df(x + wall.x1 + horizontalWallOffsetX, 0,
 					wall.y1 + horizontalWallOffsetY));
 			}
 			else //or vertical wall
 			{
-				for (int y = 0; y < dy; ++y)
+				for (auto y = 0; y < dy; ++y)
 					batchingMesh->addMesh(verticalBoundingWall.get(), irr::core::vector3df(wall.x1 + verticalWallOffsetX, 0,
 					y + wall.y1 + verticalWallOffsetY));
 			}
@@ -166,15 +172,19 @@ namespace amazeinggame
 			{
 				isPlayerPossingCamera = true;
 				if (_playerViews.size())
+				{
 					_playerViews.front().possesCamera(&_camera);
+				}
 			}
-			_videoDriver->beginScene(true, true, irr::video::SColor(255, 100, 101, 140));
+			_videoDriver->beginScene(true, true, irr::video::SColor(255, 0, 0, 0));
 			_sceneManager->drawAll();
 			_guiEnvironment->drawAll();
 			_videoDriver->endScene();
 			unsigned int dt = _timer->getRealTime() - lastFrameTime;
 			if (dt < _minTimeBetweenFrames*1000.0f)
+			{
 				_device->sleep((_minTimeBetweenFrames*1000.0f) - dt);
+			}
 			dt = _timer->getRealTime() - lastFrameTime;
 			_camera.evolve(static_cast<float>(dt) / 1000.0f);
 			lastFrameTime = _timer->getRealTime();
@@ -189,7 +199,9 @@ namespace amazeinggame
 		//TODO: set player controls and name if there are more than one human player...
 		//right now there is no split screen view, and no network controller - so this engine supports only one human player
 		if (numOfHumanPlayers > 1)
+		{
 			throw std::exception("Too many human players in world - engine does not support more than one player right now");
+		}
 		if (numOfHumanPlayers) //if there is a human player
 		{
 			_playerViews.emplace_back();
@@ -197,9 +209,9 @@ namespace amazeinggame
 			humanPlayerView.addSceneNode(_worldModel.getHumanPlayer(0), _sceneManager, _mazeRootSceneNode);
 			_gameEventReciever.setPlayerController(_worldModel.getHumanPlayer(0).getMazePlayerHumanController());
 		}
-		const int numOfAIPlayers = _worldModel.getNumOfAIPlayers();
+		const auto numOfAIPlayers = _worldModel.getNumOfAIPlayers();
 		auto textureForAIPlayer = _videoDriver->getTexture("../media/nskinrd.jpg");
-		for (int i = 0; i < numOfAIPlayers; ++i)
+		for (auto i = 0; i < numOfAIPlayers; ++i)
 		{
 			_playerViews.emplace_back();
 			auto & AIPlayerView = _playerViews.back();
@@ -229,13 +241,16 @@ namespace amazeinggame
 		loadAdditionalResources();
 		setupCamera();
 		setupPlayerViews();
+		hideMenu();
 		startOrientationScene();
 	}
 
 	void CMazeGameEngine::evolveWorld()
 	{
 		if (menu.isMenuShowing())
+		{
 			return;
+		}
 		float deltaT = getTimeFromPreviousFrame();
 		if (deltaT > 0.3) //This probably happened because of a spike drop in framerate, ignore this long frame time.
 		{ //if it happend due to the FPS droping to 3, the game is not playable anyway...
@@ -261,21 +276,23 @@ namespace amazeinggame
 	{
 		if (!isWinScreenShowing)
 		{
-			auto img = _guiEnvironment->addImage(irr::core::recti(200, 200, 500, 400));
-			img->setScaleImage(true);
-			img->setColor(irr::video::SColor(200, 255, 255, 255));
 			if (_worldModel.getMazeWinnerIdx() == 0) //it's the player
 			{
 				if (!_winScreen)
+				{
 					_winScreen = _videoDriver->getTexture("../media/winner.jpg");
-				img->setImage(_winScreen);
+				}
+				_endGameImg->setImage(_winScreen);
 			}
 			else //it's the AI
 			{
 				if (!_loseScreen)
+				{
 					_loseScreen = _videoDriver->getTexture("../media/failed.png");
-				img->setImage(_loseScreen);
+				}
+				_endGameImg->setImage(_loseScreen);
 			}
+			_endGameImg->setVisible(true);
 			isWinScreenShowing = true;
 		}
 	}
@@ -286,6 +303,8 @@ namespace amazeinggame
 	}
 	void CMazeGameEngine::showMenu()
 	{
+		isWinScreenShowing = false;
+		_endGameImg->setVisible(false);
 		menu.showMainMenu();
 		_device->setEventReceiver(&_menuEventReciever);
 	}

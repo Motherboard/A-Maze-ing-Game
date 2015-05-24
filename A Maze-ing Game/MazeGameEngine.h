@@ -25,6 +25,10 @@ namespace irr
 	{
 		class ITexture;
 	}
+	namespace gui
+	{
+		class IGUIImage;
+	}
 	class IReciever;
 }
 
@@ -72,6 +76,7 @@ namespace amazeinggame
 		const unsigned int _finishPointWatchTime = 2000;
 		irr::video::ITexture * _winScreen = nullptr, * _loseScreen = nullptr;
 		CMenuEventReciever _menuEventReciever;
+		irr::gui::IGUIImage *_endGameImg = nullptr;
 		//irr::extra::irr_ptr<irr::scene::IMetaTriangleSelector *> _mazeTriangleSelector;
 	};
 

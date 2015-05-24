@@ -19,7 +19,9 @@ namespace irr
 		CIrrlichtEngineInterface::~CIrrlichtEngineInterface()
 		{
 			if (_device)
+			{
 				_device->drop();
+			}
 		}
 
 		void CIrrlichtEngineInterface::init()
@@ -66,7 +68,7 @@ namespace irr
 						wasPaused = false;
 					_frameTime = _timer->getRealTime();
 					dtDraw = _timer->getRealTime();
-					_videoDriver->beginScene(true, true, irr::video::SColor(255, 100, 101, 140));
+					_videoDriver->beginScene(true, true, irr::video::SColor(255, 0, 0, 0));
 					_sceneManager->drawAll();
 					_guiEnvironment->drawAll();
 					_videoDriver->endScene();

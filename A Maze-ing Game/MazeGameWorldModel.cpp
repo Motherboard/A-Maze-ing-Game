@@ -47,17 +47,21 @@ namespace amazeinggame
 			}
 			numOfPossiblePlacementsFound = possiblePlayerPlacement.size();
 			if (numOfTries > width * height)
+			{
 				throw std::exception("Too many players were requested - This maze is not big enough for the both of us.");
+			}
 		} while (numOfPossiblePlacementsFound < _numOfPlayers);
 			
 		std::shuffle(std::begin(possiblePlayerPlacement), std::end(possiblePlayerPlacement), randomEngine);
 		_players.reserve(_numOfPlayers);
-		for (int i = 0; i < _numOfPlayers; ++i)
+		for (auto i = 0; i < _numOfPlayers; ++i)
 		{
 			_players.emplace_back();
 			if (i < numOfHumanPlayers)
+			{
 				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, this,
-				std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerHumanController()));
+					std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerHumanController()));
+			}
 			else
 			{
 				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, this,
@@ -69,7 +73,7 @@ namespace amazeinggame
 	
 	void CMazeGameWorldModel::evolve(float deltaT)
 	{
-		for (int playerIdx = 0; playerIdx < _numOfPlayers; ++playerIdx)
+		for (auto playerIdx = 0; playerIdx < _numOfPlayers; ++playerIdx)
 		{
 			auto & player = _players[playerIdx];
 			player.evolve(deltaT);
@@ -77,10 +81,12 @@ namespace amazeinggame
 			if (std::round(playerState.x) == _finishPoint.first && std::round(playerState.y) == _finishPoint.second)
 			{ //if player is standing on finish point, make him the winner
 				_mazeWinnerIdx = playerIdx;
-				for (int i = 0; i < _numOfPlayers; ++i)
+				for (auto i = 0; i < _numOfPlayers; ++i)
 				{
 					if (i != playerIdx)
+					{
 						_players[i].setPlayerDead();
+					}
 				}
 			}
 		}
@@ -96,14 +102,18 @@ namespace amazeinggame
 	const CMazePlayerModel & CMazeGameWorldModel::getHumanPlayer(unsigned char in_humanPlayerIdx) const
 	{
 		if (in_humanPlayerIdx > _numOfHumanPlayers)
+		{
 			throw std::exception("There are not enough human players.. this index was out of range");
+		}
 		return _players[in_humanPlayerIdx];
 	}
 
 	const CMazePlayerModel & CMazeGameWorldModel::getAIPlayer(unsigned char in_AIPlayerIdx) const
 	{
 		if (in_AIPlayerIdx + _numOfHumanPlayers >= _players.size())
+		{
 			throw std::exception("There are not enough AI players.. this index was out of range");
+		}
 		return _players[_numOfHumanPlayers + in_AIPlayerIdx];
 	}
 

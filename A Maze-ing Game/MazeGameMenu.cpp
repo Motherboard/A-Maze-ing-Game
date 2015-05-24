@@ -109,7 +109,9 @@ namespace amazeinggame
 	void CMazeGameMenu::showMainMenu()
 	{
 		if (_currentMenu == CurrentMenu::MainMenu)
+		{ 
 			return; //already showing the main manu
+		}
 		LOG(DEBUG) << "Showing main menu";
 		switch (_currentMenu)
 		{
@@ -136,7 +138,9 @@ namespace amazeinggame
 	void CMazeGameMenu::showVideoSettings()
 	{
 		if (_currentMenu == CurrentMenu::VideoSettings)
+		{ 
 			return; //already showing the video settings
+		}
 		LOG(DEBUG) << "Showing video settings";
 		switch (_currentMenu)
 		{
@@ -157,7 +161,9 @@ namespace amazeinggame
 	void CMazeGameMenu::showGameSettings()
 	{
 		if (_currentMenu == CurrentMenu::GameSettings)
+		{
 			return; //already showing the game settings
+		}
 		LOG(DEBUG) << "Showing game settings";
 		switch (_currentMenu)
 		{
@@ -179,7 +185,9 @@ namespace amazeinggame
 	void CMazeGameMenu::hideMenu()
 	{
 		if (_currentMenu == CurrentMenu::None)
+		{
 			return; //already showing no menu
+		}
 		LOG(DEBUG) << "Hiding menu";
 		switch (_currentMenu)
 		{
