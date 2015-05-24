@@ -7,6 +7,8 @@
 #include "irr_ptr.h"
 #include "MazeGameWorldModel.h"
 #include "CameraController.h"
+#include "menuEventReciever.h"
+#include "MazeGameMenu.h"
 
 namespace irr
 {
@@ -36,7 +38,7 @@ namespace amazeinggame
 	public:
 		CMazeGameEngine();
 		~CMazeGameEngine();
-		void initWorld(unsigned char in_width, unsigned char in_length, unsigned char numOfHumanPlayers, unsigned char numOfAIPlayers);
+		void initWorld(unsigned char in_width, unsigned char in_length, unsigned char numOfAIPlayers, unsigned char in_AIDifficultyLevel);
 		void setupWorld() final;
 		void setResulotion(int in_width, int in_height);
 		void showMenu();
@@ -46,6 +48,8 @@ namespace amazeinggame
 		void cameraPan(float in_dx, float in_dy);
 		void setCameraTargetCoordinates(float in_x, float in_y);
 		void setCameraTargetPlayer(CMazePlayerView &in_sceneNodeToFollow);
+		void quit();
+		CMazeGameMenu menu;
 	private:
 		void evolveWorld() final;
 		void buildMaze();
@@ -55,13 +59,11 @@ namespace amazeinggame
 		void setupCamera();
 		void setupPlayerViews();
 		void startOrientationScene();
-		bool isMenuOpen = false;
 		bool isWinScreenShowing = false;
 		float _width, _length;
 		std::vector<CMazePlayerView> _playerViews;
 		irr::scene::ISceneNode * _mazeRootSceneNode = nullptr;
 		CCameraController _camera;
-		//irr::scene::ICameraSceneNode * _camera;
 		const float _minTimeBetweenFrames = 0.016; //60 FPS
 		CMazeGameEventReciever _gameEventReciever;
 		CMazeGameWorldModel _worldModel;
@@ -69,7 +71,7 @@ namespace amazeinggame
 		bool _startPlaying = false;
 		const unsigned int _finishPointWatchTime = 2000;
 		irr::video::ITexture * _winScreen = nullptr, * _loseScreen = nullptr;
-		//CMenuEventHandler _menuEventHandler;
+		CMenuEventReciever _menuEventReciever;
 		//irr::extra::irr_ptr<irr::scene::IMetaTriangleSelector *> _mazeTriangleSelector;
 	};
 

@@ -4,6 +4,7 @@
 #include "ICameraSceneNode.h"
 namespace amazeinggame
 {
+	//A class for controlling the camera movement in a smooth way, it should be evolved along with the rest of the world.
 	class CCameraController
 	{
 	public:

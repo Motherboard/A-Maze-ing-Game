@@ -1,5 +1,6 @@
 #include "CameraController.h"
 #include <iostream>
+#include "easylogging++.h"
 
 namespace amazeinggame
 {
@@ -28,8 +29,6 @@ namespace amazeinggame
 		{	
 			//accelerate until x = 0.5v^2/a
 			irr::core::vector3df currentPosition = _camera->getPosition();
-			/*std::cerr << "[CAMERA] position: " << currentPosition.X << "," << currentPosition.Y << 
-				"," << currentPosition.Z << "->";*/
 			float reminingDistance = currentPosition.getDistanceFrom(_desiredPos);
 			if (reminingDistance > 0.5 * _positionTransitionSpeed*_positionTransitionSpeed / Acceleratoin)
 				if (_positionTransitionSpeed + Acceleratoin*deltaT < MaxSpeed)
@@ -50,13 +49,10 @@ namespace amazeinggame
 				_camera->setPosition(_camera->getPosition() + _posChangeDir * _positionTransitionSpeed * deltaT);
 			}
 			currentPosition = _camera->getPosition();
-			//std::cerr << currentPosition.X << "," << currentPosition.Y << "," << currentPosition.Z << std::endl;
 		}
 		if (_isTargetNeedsModifying)
 		{
 			irr::core::vector3df currentTarget = _camera->getTarget();
-			/*std::cerr << "[CAMERA] target: " << currentTarget.X << "," << currentTarget.Y <<
-				"," << currentTarget.Z << "->";*/
 			float reminingDistance = currentTarget.getDistanceFrom(_desiredTarget);
 			//accelerate until x = 0.5v^2/a
 			if (reminingDistance > 0.5 * _targetTransitionSpeed*_targetTransitionSpeed / Acceleratoin)
@@ -77,7 +73,6 @@ namespace amazeinggame
 			{
 				_camera->setTarget(_camera->getTarget() + _targetChangeDir * _targetTransitionSpeed * deltaT);
 			}
-			//std::cerr << currentTarget.X << "," << currentTarget.Y << "," << currentTarget.Z << std::endl;
 		}
 		if (_isPositionNeedsModifying || _isTargetNeedsModifying)
 		{
@@ -106,7 +101,6 @@ namespace amazeinggame
 	}
 	void CCameraController::setTarget(const irr::core::vector3df &in_target, bool in_keepPositionToTargetVector)
 	{
-		//std::cerr << "[CAMERA] setTarget: " << in_target.X << "," << in_target.Y << "," << in_target.Z << std::endl;
 		_desiredTarget = in_target;
 		_targetChangeDir = in_target - _camera->getTarget();
 		_targetChangeDir.normalize();
@@ -122,7 +116,6 @@ namespace amazeinggame
 
 	void CCameraController::setPosition(const irr::core::vector3df &in_position, bool in_keepPositionToTargetVector)
 	{
-		//std::cerr << "[CAMERA] setPosition: " << in_position.X << "," << in_position.Y << "," << in_position.Z << std::endl;
 		_desiredPos = in_position;
 		_posChangeDir = in_position - _camera->getPosition();
 		_posChangeDir.normalize();

@@ -21,7 +21,8 @@ namespace amazeinggame
 		public CMazePlayerControllerInterface
 	{
 	public:
-		CMazePlayerAIController(const CMazeGameWorldModel & in_worldModel);
+		CMazePlayerAIController() = delete;
+		CMazePlayerAIController(const CMazeGameWorldModel & in_worldModel, unsigned char in_AILevel = 3);
 		virtual ~CMazePlayerAIController();
 		void update(CMazePlayerModel * const in_playerModel) final;
 		//determines how far ahead the AI can look from where it is now. 
@@ -31,12 +32,12 @@ namespace amazeinggame
 		maze::Direction getNextDirection(int x, int y, maze::Direction direction);
 		bool getPossibleTurns(std::array<maze::Direction, 4> &out_possibleTurns, int & out_numOfPossibleTurns, 
 			int & out_preferedDirectionIdx, maze::Direction & out_backDirectoin ,
-			int x, int y, maze::Direction in_direction, int depth = 1);
+			int x, int y, maze::Direction in_direction, int depth);
 		const CMazeGameWorldModel * _worldModel = nullptr;
 		int _prevX = -1, _prevY = -1;
 		maze::Direction _prevDirection = maze::Direction::NotSet;
 		enum class AIWalkState { Explore, Rollback } _currentWalkState = AIWalkState::Explore;
-		int _lookAheadDepth = 3; //how far can the AI look ahead to see if a direction is a viable one.
+		int _lookAheadDepth; //how far can the AI look ahead to see if a direction is a viable one.
 		std::default_random_engine randomEngine;
 		std::array<int, 4> _possibleTurnIdx;
 		std::pair<int, int> _finishPoint;

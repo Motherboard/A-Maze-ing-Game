@@ -1,6 +1,7 @@
 #include "MazePlayerModel.h"
 #include "vector2d.h"
 #include <math.h>
+#include <cmath>
 #include <iostream>
 #include <deque>
 #include "MazeGameWorldModel.h"
@@ -71,9 +72,9 @@ namespace amazeinggame
 		{
 			if (_pInnerData->currentSpeed > 0)
 			{ //if we're already moving, complete the move - and only than change direction.
-				if (_pInnerData->movementQueue.size() > 2) //forget about earlier movement requests - the player has changed his mind.
-					_pInnerData->movementQueue.pop_front();
-				_pInnerData->movementQueue.push_back(in_newDirection);
+				if (_pInnerData->movementQueue.size() > 2) //forget about the earliest movement requests - the player has changed his mind.
+					_pInnerData->movementQueue.pop_front(); //we keep maximum of only 2 movements in the queue. - the movement the player would take once he's finished moving
+				_pInnerData->movementQueue.push_back(in_newDirection); //and the next movement to execute.
 				return;
 			}
 			_pInnerData->previousDirection = _pInnerData->currentDirection;
@@ -83,12 +84,12 @@ namespace amazeinggame
 
 			irr::core::vector2df directionChange = _pInnerData->currentDirection - _pInnerData->previousDirection;
 			if (1 < abs(directionChange.X) || 1 < abs(directionChange.Y))
-				_pInnerData->remainingAngle = static_cast<int>(round(180 + _pInnerData->remainingAngle)) % 360;
+				_pInnerData->remainingAngle = std::remainder(180.0f + _pInnerData->remainingAngle, 360.0f);
 			else if (irr::core::vector2df(_pInnerData->previousDirection.Y, -_pInnerData->previousDirection.X)
 				.dotProduct(_pInnerData->currentDirection) < 0)
-				_pInnerData->remainingAngle = static_cast<int>(round(_pInnerData->remainingAngle - 90)) % 360;
+				_pInnerData->remainingAngle = std::remainder(_pInnerData->remainingAngle - 90, 360);
 			else
-				_pInnerData->remainingAngle = static_cast<int>(round(_pInnerData->remainingAngle + 90)) % 360;
+				_pInnerData->remainingAngle = std::remainder(_pInnerData->remainingAngle + 90, 360);
 			_pInnerData->movementState = MovementState::Rotate;
 		}
 		else
@@ -135,14 +136,13 @@ namespace amazeinggame
 			rotationAngle = _pInnerData->remainingAngle > 0 ? _pInnerData->angularSpeed * deltaT : -_pInnerData->angularSpeed * deltaT;
 		_pInnerData->remainingAngle -= rotationAngle;
 		_pInnerData->currentAngle += rotationAngle;
-		//_pInnerData->playerSceneNode->setRotation(irr::core::vector3df(0, _pInnerData->playerSceneNode->getRotation().Y + rotationAngle, 0));
 	}
 
 	void CMazePlayerModel::moveStraight(float deltaT)
 	{
 		float stepSize = deltaT * _pInnerData->currentSpeed;
-		if (stepSize > 1)
-			stepSize = 1;
+		if (stepSize > 1) //only allow to move one cell at a time, this would happen only if the frame-rate dropped dangerously low
+			stepSize = 1; //it might be irritating to "teleport" accross a corridor without being able to take a turn...
 		irr::core::vector2df movementVector = _pInnerData->currentDirection * stepSize;
 		bool shouldStop = false;
 		float newDistanceFromLastTurn = _pInnerData->distanceWalkedFromLastTurn + stepSize;
@@ -162,7 +162,6 @@ namespace amazeinggame
 		}
 		else
 			_pInnerData->distanceWalkedFromLastTurn = newDistanceFromLastTurn;
-		//_pInnerData->playerSceneNode->setPosition(_pInnerData->playerSceneNode->getPosition() + movementVector);
 		_pInnerData->currentPosition += movementVector;
 		if (shouldStop) //this is here to make sure the walking animation continues up untill the last frame.
 		{
@@ -178,15 +177,6 @@ namespace amazeinggame
 
 	bool CMazePlayerModel::isAboutToCollide()
 	{
-		//This was the "physical" way to check for collisions - it's way slower than the new way...
-		/*irr::core::vector3df collisionPoint;
-		irr::core::triangle3df collisionTriangle;
-		irr::scene::ISceneNode * collisionNode;
-		bool collisionResult = _pInnerData->sceneManager->getSceneCollisionManager()->getCollisionPoint(
-		irr::core::line3df(_pInnerData->playerSceneNode->getAbsolutePosition(),
-		_pInnerData->playerSceneNode->getAbsolutePosition() +
-		0.2 * _pInnerData->playerSceneNode->getBoundingBox().MinEdge.getLength() * _pInnerData->currentDirection),
-		_pInnerData->levelTriangleSelector, collisionPoint, collisionTriangle, collisionNode);*/
 		if (_worldModel)
 			return !(_worldModel->getMaze().isDirectionAllowedFromPosition(std::round(_pInnerData->currentPosition.X),
 			std::round(_pInnerData->currentPosition.Y), _pInnerData->movementDirection));

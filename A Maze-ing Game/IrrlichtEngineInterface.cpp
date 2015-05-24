@@ -71,8 +71,8 @@ namespace irr
 					_guiEnvironment->drawAll();
 					_videoDriver->endScene();
 					avgDraw = ((avgDraw*(loop - 1) + static_cast<double>(_timer->getRealTime() - dtDraw))) / loop;
-					if ((static_cast<int>(loop) % 60) == 0)
-						std::cerr << "Draw time: " << avgDraw << "ms" << std::endl << "evolve time: " << avgEvolve << std::endl;
+					/*if ((static_cast<int>(loop) % 60) == 0)
+						std::cerr << "Draw time: " << avgDraw << "ms" << std::endl << "evolve time: " << avgEvolve << std::endl;*/
 					
 				}
 				else

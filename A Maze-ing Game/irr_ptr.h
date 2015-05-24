@@ -1,4 +1,5 @@
 #pragma once
+//This file was copied off from the irrlicht forum, it was not made by me
 
 // C++ Standard Library:
 #include <type_traits>

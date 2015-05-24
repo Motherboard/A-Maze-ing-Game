@@ -18,8 +18,9 @@ namespace amazeinggame
 	CMazeGameWorldModel::~CMazeGameWorldModel()
 	{
 	}
-	void CMazeGameWorldModel::initGameWorld(unsigned char width, unsigned char height, unsigned char numOfHumanPlayers, unsigned char numOfAIPlayers)
+	void CMazeGameWorldModel::initGameWorld(unsigned char width, unsigned char height, unsigned char numOfHumanPlayers, unsigned char numOfAIPlayers, unsigned char AIDifficultyLevel)
 	{
+		_players.clear();
 		_mazeWinnerIdx = -1;
 		_numOfPlayers = numOfAIPlayers + numOfHumanPlayers;
 		_numOfHumanPlayers = numOfHumanPlayers;
@@ -60,7 +61,7 @@ namespace amazeinggame
 			else
 			{
 				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, this,
-					std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerAIController(*this)));
+					std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerAIController(*this,AIDifficultyLevel)));
 
 			}
 		}
@@ -70,8 +71,6 @@ namespace amazeinggame
 	{
 		for (int playerIdx = 0; playerIdx < _numOfPlayers; ++playerIdx)
 		{
-			//if (_mazeWinnerIdx >= 0) //if there already is a winner, no reason to evolove world anymore
-			//	return;
 			auto & player = _players[playerIdx];
 			player.evolve(deltaT);
 			auto playerState = player.getPlayerState();

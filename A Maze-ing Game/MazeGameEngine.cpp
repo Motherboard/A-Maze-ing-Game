@@ -5,16 +5,19 @@
 #include <algorithm>
 #include "CBatchingMesh.h"
 #include <random>
-
+#include "easylogging++.h"
 
 namespace amazeinggame
 {
 
 
 	CMazeGameEngine::CMazeGameEngine()
-		: _gameEventReciever(this)
+		: _gameEventReciever(this), _menuEventReciever(this)
 	{
-
+		auto screenSize = _videoDriver->getScreenSize();
+		menu.init(_guiEnvironment, irr::core::recti(
+			irr::core::vector2di(screenSize.Width / 4, screenSize.Height / 4),screenSize / 2));
+		showMenu();
 	}
 
 
@@ -23,24 +26,26 @@ namespace amazeinggame
 	}
 
 
-	void CMazeGameEngine::initWorld(unsigned char in_width, unsigned char in_length, unsigned char in_numOfHumanPlayers, unsigned char in_numOfAIPlayers)
+	void CMazeGameEngine::initWorld(unsigned char in_width, unsigned char in_length, unsigned char in_numOfAIPlayers, unsigned char in_AIDifficultyLevel)
 	{
+		//clear the player views list, since we're going to get rid of the player models - dont want to leave dangling pointers around!
+		_playerViews.clear();
 		_width = in_width;
 		_length = in_length;
-		std::clog << "making the maze" << std::endl;
+		LOG(INFO) << "making the maze";
 		bool success = false;
 		int numOfTries = 0;
 		do
 		{
 			try
 			{
-				_worldModel.initGameWorld(in_width, in_length, in_numOfHumanPlayers, in_numOfAIPlayers);
+				_worldModel.initGameWorld(in_width, in_length, 1, in_numOfAIPlayers, in_AIDifficultyLevel);
 				success = true;
 			}
 			catch (std::exception exp)
 			{
 				++numOfTries;
-				std::cerr << exp.what() << std::endl;
+				LOG(WARNING) << exp.what();
 			}
 		} while (!success && numOfTries < 10);
 		if (!success)
@@ -51,7 +56,7 @@ namespace amazeinggame
 
 	void CMazeGameEngine::buildMaze()
 	{
-		std::clog << "getting the walls" << std::endl;
+		LOG(INFO) << "getting the walls" << std::endl;
 		auto walls = _worldModel.getMaze().getMazeWalls();
 
 		irr::extra::irr_ptr<irr::scene::CBatchingMesh *> batchingMesh(new irr::scene::CBatchingMesh());
@@ -178,6 +183,8 @@ namespace amazeinggame
 
 	void CMazeGameEngine::setupPlayerViews()
 	{
+		//make sure that we don't set more player views than playr models
+		_playerViews.clear();
 		const int numOfHumanPlayers = _worldModel.getNumOfHumanPlayers();
 		//TODO: set player controls and name if there are more than one human player...
 		//right now there is no split screen view, and no network controller - so this engine supports only one human player
@@ -199,7 +206,6 @@ namespace amazeinggame
 			AIPlayerView.addSceneNode(_worldModel.getAIPlayer(i), _sceneManager, _mazeRootSceneNode);
 			AIPlayerView.setTexture(textureForAIPlayer);
 		}
-		_device->setEventReceiver(&_gameEventReciever);
 	}
 
 	void CMazeGameEngine::setupCamera()
@@ -228,20 +234,22 @@ namespace amazeinggame
 
 	void CMazeGameEngine::evolveWorld()
 	{
-		float deltaT = getTimeFromPreviousFrame();
-		if (deltaT > 0.3)
+		if (menu.isMenuShowing())
 			return;
+		float deltaT = getTimeFromPreviousFrame();
+		if (deltaT > 0.3) //This probably happened because of a spike drop in framerate, ignore this long frame time.
+		{ //if it happend due to the FPS droping to 3, the game is not playable anyway...
+			LOG(DEBUG) << "Skipped frame, it was too late";
+			return;
+		}
 		if (deltaT < _minTimeBetweenFrames) //I want max 60 FPS
 		{
 			_device->sleep((_minTimeBetweenFrames - deltaT) * 1000.0f);
 			deltaT = getTimeFromPreviousFrame();
 		}
-		if (!isMenuOpen)
-		{
-			_worldModel.evolve(deltaT);
-			for (auto & playerView : _playerViews)
-				playerView.update(0);
-		}
+		_worldModel.evolve(deltaT);
+		for (auto & playerView : _playerViews)
+			playerView.update(0);
 		_camera.evolve(deltaT);
 		if (_worldModel.isMazeGameWon())
 		{
@@ -255,18 +263,19 @@ namespace amazeinggame
 		{
 			auto img = _guiEnvironment->addImage(irr::core::recti(200, 200, 500, 400));
 			img->setScaleImage(true);
+			img->setColor(irr::video::SColor(200, 255, 255, 255));
 			if (_worldModel.getMazeWinnerIdx() == 0) //it's the player
-				img->setImage(_videoDriver->getTexture("../media/winner.jpg"));
+			{
+				if (!_winScreen)
+					_winScreen = _videoDriver->getTexture("../media/winner.jpg");
+				img->setImage(_winScreen);
+			}
 			else //it's the AI
-				img->setImage(_videoDriver->getTexture("../media/failed.png"));
-			
-			//also make sure the textures were loaded before showing them...
-			//if (_worldModel.getMazeWinnerIdx() == 0 && _winScreen) //it's the player
-			//	_videoDriver->draw2DImage(_winScreen, irr::core::vector2di(200,200), irr::core::recti(irr::core::vector2di(0,0),
-			//	_winScreen->getOriginalSize()),static_cast<irr::core::recti *>(nullptr), irr::video::SColor(127, 255, 255, 255), true);
-			//else if (_loseScreen)//AI won
-			//	_videoDriver->draw2DImage(_loseScreen, irr::core::vector2di(200, 200), irr::core::recti(irr::core::vector2di(0, 0),
-			//	_winScreen->getOriginalSize()), static_cast<irr::core::recti *>(nullptr), irr::video::SColor(127, 255, 255, 255), true);
+			{
+				if (!_loseScreen)
+					_loseScreen = _videoDriver->getTexture("../media/failed.png");
+				img->setImage(_loseScreen);
+			}
 			isWinScreenShowing = true;
 		}
 	}
@@ -277,11 +286,13 @@ namespace amazeinggame
 	}
 	void CMazeGameEngine::showMenu()
 	{
-
+		menu.showMainMenu();
+		_device->setEventReceiver(&_menuEventReciever);
 	}
 	void CMazeGameEngine::hideMenu()
 	{
-
+		menu.hideMenu();
+		_device->setEventReceiver(&_gameEventReciever);
 	}
 
 	void CMazeGameEngine::cameraZoomOut()
@@ -308,4 +319,10 @@ namespace amazeinggame
 	{
 		in_playerToFollow.possesCamera(&_camera);
 	}
+
+	void CMazeGameEngine::quit()
+	{
+
+	}
+
 }

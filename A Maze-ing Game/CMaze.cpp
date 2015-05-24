@@ -67,7 +67,6 @@ namespace maze
 
 	CMaze::Cell::Cell(int in_x, int in_y, size_t in_groupId) : x(in_x), y(in_y), cellGroupId(in_groupId)
 	{
-		//std::make_pair <size_t, std::forward_list<size_t> >(
 		ptrOfListOfCellInSameGroup = std::make_shared<std::pair<size_t, std::forward_list<size_t>>>(1, std::forward_list < size_t > { cellGroupId });
 	}
 
@@ -83,6 +82,8 @@ namespace maze
 		using namespace std;
 		_width = in_width;
 		_length = in_length;
+		_mazeCells.clear();
+		_mazeWalls.clear();
 		_mazeCells.resize(_width*_length);
 		_mazeWalls.resize(_mazeCells.size() * 2 - _length - _width);
 		int wallIdx = 0;

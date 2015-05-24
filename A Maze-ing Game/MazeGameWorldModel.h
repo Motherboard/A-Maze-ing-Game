@@ -14,7 +14,7 @@ namespace amazeinggame
 	public:
 		CMazeGameWorldModel();
 		~CMazeGameWorldModel();
-		void initGameWorld(unsigned char width, unsigned char height, unsigned char numOfHumanPlayers, unsigned char numOfAIPlayers);
+		void initGameWorld(unsigned char width, unsigned char height, unsigned char numOfHumanPlayers, unsigned char numOfAIPlayers, unsigned char AIDifficultyLevel);
 		//void assignContollerToPlayer(unsigned char playerId ,controller );
 		void evolve(float deltaT);
 		std::pair<int, int> getFinishPoint() const;
