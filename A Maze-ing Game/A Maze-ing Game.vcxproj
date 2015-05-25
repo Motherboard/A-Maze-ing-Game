@@ -59,7 +59,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>irrlicht.lib;BulletDynamics_vs2010.lib;BulletCollision_vs2010.lib;LinearMath_vs2010.lib</AdditionalDependencies>
+      <AdditionalDependencies>irrlicht.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\irrlicht-1.8.1\lib\Win32-visualstudio\dynamic\debug;C:\c++\bullet-2.82-r2704\lib\</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
