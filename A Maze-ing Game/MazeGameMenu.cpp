@@ -55,10 +55,10 @@ namespace amazeinggame
 		button = in_guiEnv->addButton(irr::core::recti(elementPosition, elementSize), nullptr, MenuElement::VideoSettingsBtn, L"Video Settings");
 		//button->setImage(in_videoDriver->getTexture("../media/videoSettings.jpg"));
 		_mainMenuElements.push_back(button);
-		elementPosition.Y += elementSeperation + elementSize.Height;
-		button = in_guiEnv->addButton(irr::core::recti(elementPosition, elementSize), nullptr, MenuElement::QuitBtn, L"Quit");
+		//elementPosition.Y += elementSeperation + elementSize.Height;
+		//button = in_guiEnv->addButton(irr::core::recti(elementPosition, elementSize), nullptr, MenuElement::QuitBtn, L"Quit");
 		//button->setImage(in_videoDriver->getTexture("../media/quitGame.jpg"));
-		_mainMenuElements.push_back(button);
+		//_mainMenuElements.push_back(button);
 		//set the video settings menu
 		elementPosition.Y = in_menuRect.UpperLeftCorner.Y;
 		auto resImage = in_guiEnv->addImage(irr::core::recti(elementPosition, elementSize));

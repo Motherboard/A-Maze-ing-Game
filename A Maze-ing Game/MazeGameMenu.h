@@ -69,9 +69,7 @@ namespace amazeinggame
 		std::vector <irr::gui::IGUIElement *> _videoSettingsElements;
 		std::vector <irr::gui::IGUIElement *> _gameSettingsElements;
 		irr::gui::IGUIElement * _menuBackground;
-		//irr::gui::IGUIElement * _screenBackground;
 		enum class CurrentMenu {MainMenu, VideoSettings, GameSettings, None} _currentMenu;
-		//unsigned int _numOfAI, _difficultyLevel, resolutionWidth, resolutionHeight, mazeWidth, mazeHeight;
 		irr::gui::IGUIEnvironment * _guiEnv = nullptr;
 		//some constants to control the size of gui elements
 		const float ElementHeightRatio = 0.15;
