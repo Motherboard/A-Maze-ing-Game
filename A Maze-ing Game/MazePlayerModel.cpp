@@ -30,6 +30,9 @@ namespace amazeinggame
 		bool isStopRequested = false;
 		float distanceWalkedFromLastTurn = 0;
 		std::deque<maze::Direction> movementQueue;
+		std::string _name;
+		bool _isPlayerDead = false;
+		unsigned int _desiredMovementQueueSize = 0;
 	};
 
 
@@ -57,8 +60,8 @@ namespace amazeinggame
 	CMazePlayerModel::CMazePlayerModel(CMazePlayerModel &&other)
 	{
 		_pInnerData = std::move(other._pInnerData);
-		_name = std::move(other._name);
-		_worldModel = std::move(other._worldModel);
+		_worldModel = other._worldModel;
+		other._worldModel = nullptr;
 	}
 
 	CMazePlayerModel::~CMazePlayerModel()
@@ -72,9 +75,15 @@ namespace amazeinggame
 		{
 			if (_pInnerData->currentSpeed > 0)
 			{ //if we're already moving, complete the move - and only than change direction.
-				if (_pInnerData->movementQueue.size() > 2) //forget about the earliest movement requests - the player has changed his mind.
-				{										//we keep maximum of only 2 movements in the queue. - 
-					_pInnerData->movementQueue.pop_front(); //the movement the player would take once he's finished moving
+				if (_pInnerData->movementQueue.size() > 0)
+				{
+					if (_pInnerData->movementQueue.back() != in_newDirection)
+					{ //only place the new direction in queue if it is unique.
+						if (_pInnerData->movementQueue.size() > _pInnerData->_desiredMovementQueueSize) //forget about the earliest movement requests - the player has changed his mind.
+						{										//we keep maximum of only _desiredMovementQueueSize movements in the queue. - 
+							_pInnerData->movementQueue.pop_front(); //the movement the player would take once he's finished moving
+						}
+					}
 				}
 				_pInnerData->movementQueue.push_back(in_newDirection); //and the next movement to execute.
 				return;
@@ -110,12 +119,12 @@ namespace amazeinggame
 
 	void CMazePlayerModel::setPlayerDead()
 	{
-		_isPlayerDead = true;
+		_pInnerData->_isPlayerDead = true;
 	}
 
 	void CMazePlayerModel::evolve(float deltaT)
 	{
-		if (_isPlayerDead)
+		if (_pInnerData->_isPlayerDead)
 		{
 			return;
 		}
@@ -224,7 +233,7 @@ namespace amazeinggame
 			, _pInnerData->currentSpeed * _pInnerData->currentDirection.X
 			, _pInnerData->currentSpeed * _pInnerData->currentDirection.Y,
 			_pInnerData->currentAngle, _pInnerData->angularSpeed, _pInnerData->remainingAngle, 
-			_isPlayerDead };
+			_pInnerData->_isPlayerDead };
 	}
 
 	CMazePlayerHumanController * const CMazePlayerModel::getMazePlayerHumanController() const
@@ -234,10 +243,15 @@ namespace amazeinggame
 
 	void CMazePlayerModel::setPlayerName(std::string in_playerName)
 	{
-		_name = in_playerName;
+		_pInnerData->_name = in_playerName;
 	}
 	const std::string & CMazePlayerModel::getPlayerName() const
 	{
-		return _name;
+		return _pInnerData->_name;
+	}
+
+	void CMazePlayerModel::setMovementQueueSize(unsigned int in_queueSize)
+	{
+		_pInnerData->_desiredMovementQueueSize = in_queueSize;
 	}
 }

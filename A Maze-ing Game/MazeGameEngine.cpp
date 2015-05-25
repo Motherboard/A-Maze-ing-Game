@@ -14,16 +14,24 @@ namespace amazeinggame
 	CMazeGameEngine::CMazeGameEngine()
 		: _gameEventReciever(this), _menuEventReciever(this)
 	{
+		setupMenuAndWinScreen();
+	}
+
+	void CMazeGameEngine::setupMenuAndWinScreen()
+	{
 		auto screenSize = _videoDriver->getScreenSize();
 		_endGameImg = _guiEnvironment->addImage(irr::core::recti(irr::core::vector2di(screenSize.Width / 4, screenSize.Height / 4), screenSize / 4));
 		_endGameImg->setVisible(false);
 		_endGameImg->setScaleImage(true);
 		_endGameImg->setColor(irr::video::SColor(200, 255, 255, 255));
 		menu.init(_guiEnvironment, irr::core::recti(
-			irr::core::vector2di(screenSize.Width / 4, screenSize.Height / 4),screenSize / 2));
-		showMenu();
+			irr::core::vector2di(screenSize.Width / 4, screenSize.Height / 4), screenSize / 2));
+		_introScreen = _guiEnvironment->addImage(irr::core::recti(irr::core::vector2di(0, 0), _videoDriver->getScreenSize()));
+		_introScreen->setScaleImage(true);
+		_introScreen->setImage(_videoDriver->getTexture("../media/game intro screen.jpg"));
+		_device->setEventReceiver(&_gameEventReciever);
+		//showMenu();
 	}
-
 
 	CMazeGameEngine::~CMazeGameEngine()
 	{
@@ -34,6 +42,7 @@ namespace amazeinggame
 	{
 		//clear the player views list, since we're going to get rid of the player models - dont want to leave dangling pointers around!
 		_playerViews.clear();
+		_gameEventReciever.setPlayerController(nullptr); //make sure the controller does not point to a dangling controller
 		_width = in_width;
 		_length = in_length;
 		LOG(INFO) << "making the maze";
@@ -247,7 +256,7 @@ namespace amazeinggame
 
 	void CMazeGameEngine::evolveWorld()
 	{
-		if (menu.isMenuShowing())
+		if (menu.isMenuShowing() || !_worldModel.isWorldInitialized())
 		{
 			return;
 		}
@@ -297,12 +306,17 @@ namespace amazeinggame
 		}
 	}
 
-	void CMazeGameEngine::setResulotion(int in_width, int in_height)
+	void CMazeGameEngine::setResulotion(unsigned int in_width, unsigned int in_height)
 	{
-
+		init(in_width, in_height);
+		setupMenuAndWinScreen();
+		if (isGameOngoing())
+			setupWorld();
+		startEventLoop();
 	}
 	void CMazeGameEngine::showMenu()
 	{
+		_introScreen->setVisible(false);
 		isWinScreenShowing = false;
 		_endGameImg->setVisible(false);
 		menu.showMainMenu();
@@ -341,7 +355,13 @@ namespace amazeinggame
 
 	void CMazeGameEngine::quit()
 	{
+		_device->drop();
+		_device = nullptr;
+	}
 
+	bool CMazeGameEngine::isGameOngoing()
+	{
+		return (!_worldModel.isMazeGameWon() && _worldModel.isWorldInitialized());
 	}
 
 }

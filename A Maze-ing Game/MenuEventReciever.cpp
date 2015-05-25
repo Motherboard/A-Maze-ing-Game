@@ -44,7 +44,7 @@ namespace amazeinggame
 			switch (event.GUIEvent.Caller->getID())
 			{
 			case CMazeGameMenu::MenuElement::BackToGameBtn:
-				_parentGameEngine->hideMenu(); break;
+				if (_parentGameEngine->isGameOngoing()) { _parentGameEngine->hideMenu(); } break;
 			case CMazeGameMenu::MenuElement::BackToMainMenuBtn:
 				_parentGameEngine->menu.showMainMenu(); break;
 			case CMazeGameMenu::MenuElement::GameSettingsBtn:

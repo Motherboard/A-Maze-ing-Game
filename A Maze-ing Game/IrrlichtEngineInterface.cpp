@@ -24,20 +24,28 @@ namespace irr
 			}
 		}
 
-		void CIrrlichtEngineInterface::init()
+		void CIrrlichtEngineInterface::init(unsigned int in_screenWidth, unsigned int in_screenHeight)
 		{
+			if (_device)
+			{
+				_device->drop();
+			}
 			_device =
-				irr::createDevice(irr::video::EDT_OPENGL, irr::core::dimension2d<irr::u32>(800, 600), 16,
+				irr::createDevice(irr::video::EDT_OPENGL, irr::core::dimension2d<irr::u32>(in_screenWidth, in_screenHeight), 16,
 				false, false, false, 0);
 			if (!_device)
 			{
 				std::clog << "failed creating openGL window... reverting to software rendering" << std::endl;
 				_device =
-					irr::createDevice(irr::video::EDT_SOFTWARE, irr::core::dimension2d<irr::u32>(800, 600), 16,
+					irr::createDevice(irr::video::EDT_SOFTWARE, irr::core::dimension2d<irr::u32>(in_screenWidth, in_screenHeight), 16,
 					false, false, false, 0);
+				if (!_device && in_screenWidth != 800 && in_screenHeight != 600)
+				{
+					init(800, 600);
+				}
 				if (!_device)
 				{
-					std::exception("failed initializg software rendering, there is no other choice but to give up...");
+					throw std::exception("Failed initializing window");
 				}
 			}
 			_videoDriver = _device->getVideoDriver();

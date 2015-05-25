@@ -26,13 +26,15 @@ namespace amazeinggame
 		unsigned char getMazeWinnerIdx() const;
 		const std::string & getMazeWinnerName() const;
 		bool isMazeGameWon() const;
+		bool isWorldInitialized() const;
 	private:
 		maze::CMaze _maze;
 		std::vector<CMazePlayerModel> _players; //first _numOfHumanPlayers are human, the rest AI
 		std::pair<unsigned char, unsigned char> _finishPoint;
 		unsigned char _numOfHumanPlayers;
 		int _mazeWinnerIdx = -1;
-		unsigned int _numOfPlayers;
+		unsigned int _numOfPlayers = 0;
+		bool _isInitialized = false;
 	};
 
 }

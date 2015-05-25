@@ -1,6 +1,7 @@
 #include "MazeGameWorldModel.h"
 #include "MazePlayerHumanController.h"
 #include "MazePlayerAIController.h"
+#include "easylogging++.h"
 #include <random>
 #include <chrono>
 #include <algorithm>
@@ -51,28 +52,41 @@ namespace amazeinggame
 				throw std::exception("Too many players were requested - This maze is not big enough for the both of us.");
 			}
 		} while (numOfPossiblePlacementsFound < _numOfPlayers);
-			
-		std::shuffle(std::begin(possiblePlayerPlacement), std::end(possiblePlayerPlacement), randomEngine);
-		_players.reserve(_numOfPlayers);
-		for (auto i = 0; i < _numOfPlayers; ++i)
+		_isInitialized = true;
+		//set the world as initialized after having the positions of everything set
+		//try adding players
+		try
 		{
-			_players.emplace_back();
-			if (i < numOfHumanPlayers)
+			std::shuffle(std::begin(possiblePlayerPlacement), std::end(possiblePlayerPlacement), randomEngine);
+			_players.reserve(_numOfPlayers);
+			for (auto i = 0; i < _numOfPlayers; ++i)
 			{
-				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, this,
-					std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerHumanController()));
-			}
-			else
-			{
-				_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, this,
-					std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerAIController(*this,AIDifficultyLevel)));
+				_players.emplace_back();
+				if (i < numOfHumanPlayers)
+				{
+					_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, this,
+						std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerHumanController()));
+				}
+				else
+				{
+					_players.back().init(possiblePlayerPlacement[i].first, possiblePlayerPlacement[i].second, this,
+						std::unique_ptr<CMazePlayerControllerInterface>(new CMazePlayerAIController(*this, AIDifficultyLevel)));
 
+				}
 			}
 		}
+		catch (std::exception &exp)
+		{ //catch the exceptions here, so that we can set the world to being uninitialized properly...
+			LOG(ERROR) << "Failed initializing player: " << exp.what();
+			_isInitialized = false;
+		}
+		
 	}
 	
 	void CMazeGameWorldModel::evolve(float deltaT)
 	{
+		if (!_isInitialized)
+			return;
 		for (auto playerIdx = 0; playerIdx < _numOfPlayers; ++playerIdx)
 		{
 			auto & player = _players[playerIdx];
@@ -93,10 +107,20 @@ namespace amazeinggame
 	}
 	std::pair<int, int> CMazeGameWorldModel::getFinishPoint() const
 	{
+		if (!_isInitialized)
+		{
+			LOG(ERROR) << "cant get finish point before world is initialized";
+			throw std::exception("Trying to query finish point, the the world was not initialized yet!");
+		}
 		return _finishPoint;
 	}
 	const maze::CMaze & CMazeGameWorldModel::getMaze() const
 	{
+		if (!_isInitialized)
+		{
+			LOG(ERROR) << "cant get maze before world is initialized";
+			throw std::exception("Trying to get maze reference, the the world was not initialized yet!");
+		}
 		return _maze;
 	}
 	const CMazePlayerModel & CMazeGameWorldModel::getHumanPlayer(unsigned char in_humanPlayerIdx) const
@@ -137,5 +161,8 @@ namespace amazeinggame
 	{
 		return (_mazeWinnerIdx >= 0);
 	}
-
+	bool CMazeGameWorldModel::isWorldInitialized() const
+	{
+		return _isInitialized;
+	}
 }

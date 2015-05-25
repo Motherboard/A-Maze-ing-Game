@@ -28,6 +28,12 @@ bool CMazeGameEventReciever::OnEvent(const irr::SEvent& event)
 {
 	if (event.EventType == irr::EET_KEY_INPUT_EVENT)
 	{
+		if (!_parentGameEngine->isGameOngoing())
+		{
+			_sleep(1000);
+			_parentGameEngine->showMenu();
+			return true;
+		}
 		switch (event.KeyInput.Key)
 		{
 			if (_playerController)

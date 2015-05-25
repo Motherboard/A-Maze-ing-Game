@@ -44,7 +44,7 @@ namespace amazeinggame
 		~CMazeGameEngine();
 		void initWorld(unsigned char in_width, unsigned char in_length, unsigned char numOfAIPlayers, unsigned char in_AIDifficultyLevel);
 		void setupWorld() final;
-		void setResulotion(int in_width, int in_height);
+		void setResulotion(unsigned int in_width, unsigned int in_height);
 		void showMenu();
 		void hideMenu();
 		void cameraZoomOut();
@@ -53,9 +53,11 @@ namespace amazeinggame
 		void setCameraTargetCoordinates(float in_x, float in_y);
 		void setCameraTargetPlayer(CMazePlayerView &in_sceneNodeToFollow);
 		void quit();
+		bool isGameOngoing();
 		CMazeGameMenu menu;
 	private:
 		void evolveWorld() final;
+		void setupMenuAndWinScreen();
 		void buildMaze();
 		void addFinishPoint();
 		void showWinScreen();
@@ -77,6 +79,7 @@ namespace amazeinggame
 		irr::video::ITexture * _winScreen = nullptr, * _loseScreen = nullptr;
 		CMenuEventReciever _menuEventReciever;
 		irr::gui::IGUIImage *_endGameImg = nullptr;
+		irr::gui::IGUIImage * _introScreen = nullptr;
 		//irr::extra::irr_ptr<irr::scene::IMetaTriangleSelector *> _mazeTriangleSelector;
 	};
 

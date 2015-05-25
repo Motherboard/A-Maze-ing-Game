@@ -31,7 +31,7 @@ namespace irr
 			void startEventLoop();
 			virtual void setupWorld() = 0;
 		protected:
-			void init();
+			void init(unsigned int in_screenWidth = 800, unsigned int in_screenHeight = 600);
 			float getTimeFromPreviousFrame();
 			virtual void evolveWorld() = 0;
 
