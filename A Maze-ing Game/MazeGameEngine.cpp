@@ -355,8 +355,7 @@ namespace amazeinggame
 
 	void CMazeGameEngine::quit()
 	{
-		_device->drop();
-		_device = nullptr;
+		_device->closeDevice();
 	}
 
 	bool CMazeGameEngine::isGameOngoing()

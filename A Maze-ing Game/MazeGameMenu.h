@@ -1,6 +1,11 @@
 #pragma once
 
+//This class represents the graphical aspect of the GUI: it shows and hides menus and quesries the GUI elements 
+//for their values.
+//The CMenuEventReciever class is responsible for getting user events and handling the logic of what to do with them.
+
 #include <vector>
+#include <type_traits>
 #include "rect.h"
 
 namespace irr
@@ -26,13 +31,20 @@ namespace amazeinggame
 	public:
 		enum MenuElement {NewGameBtn, VideoSettingsBtn, GameSettingsBtn, QuitBtn, SetVideoSettingsBtn, BackToMainMenuBtn, SetGameSettingsBtn, BackToGameBtn, ResolutionDropDown, MazeWidth, MazeHeight, MazeNumOfAI, MazeAIDifficultyLevel};
 		CMazeGameMenu();
+		//initialize the menu items 
+		//in_guiEnv should point to an instance of GuiEnvironment obtained from the irrlicht device
+		//in_menuRect specifies the region the menu will take up.
 		void init(irr::gui::IGUIEnvironment * const in_guiEnv, const irr::core::recti & in_menuRect);
 		void showMainMenu();
 		bool isMenuShowing();
 		void showVideoSettings();
 		void showGameSettings();
 		void hideMenu();
+		//get the values for maze dimensions currently selected in the game settings menu
+		//first is width, second is height
 		std::pair<unsigned char,unsigned char> getChosenMazeDimensions();
+		//get the resolution from the video settings menu
+		//first is width, second is height
 		std::pair<int, int> getChosenResolution();
 		unsigned int getChosenNumOfAIPlayers();
 		unsigned int getChosenAIDifficultyLevel();
@@ -42,6 +54,9 @@ namespace amazeinggame
 		template <typename T>
 		std::remove_pointer_t<T> * getGuiElement(int in_id)
 		{
+			//check that T is a valid type to try to upcast during compile time.
+			static_assert(std::is_base_of<irr::gui::IGUIElement, std::remove_pointer_t<T>>::value, 
+				"T must inherit irr::gui::IGUIElement");
 			if (!_guiEnv)
 			{
 				//LOG(ERROR) << "gui environment is null";
