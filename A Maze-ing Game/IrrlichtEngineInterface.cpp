@@ -58,30 +58,30 @@ namespace irr
 		void CIrrlichtEngineInterface::startEventLoop()
 		{
 			bool wasPaused = false;
-			double loop = 0;
-			double avgEvolve = 0;
-			double avgDraw = 0;
+			//double loop = 0;
+			//double avgEvolve = 0;
+			//double avgDraw = 0;
 			while (_device->run()) //call _device->close() to exit event loop
 			{	
-				irr::u32 dtEvolve, dtDraw; 
+				//irr::u32 dtEvolve, dtDraw; 
 				if (_device->isWindowActive())
 				{
 					if (!wasPaused)
 					{
-						dtEvolve = _timer->getRealTime();
+						//dtEvolve = _timer->getRealTime();
 						evolveWorld();
-						dtEvolve = _timer->getRealTime() - dtEvolve;
-						avgEvolve = (avgEvolve*loop + static_cast<double>(dtEvolve)) / (++loop);
+						//dtEvolve = _timer->getRealTime() - dtEvolve;
+						//avgEvolve = (avgEvolve*loop + static_cast<double>(dtEvolve)) / (++loop);
 					}
 					else
 						wasPaused = false;
 					_frameTime = _timer->getRealTime();
-					dtDraw = _timer->getRealTime();
+					//dtDraw = _timer->getRealTime();
 					_videoDriver->beginScene(true, true, irr::video::SColor(255, 0, 0, 0));
 					_sceneManager->drawAll();
 					_guiEnvironment->drawAll();
 					_videoDriver->endScene();
-					avgDraw = ((avgDraw*(loop - 1) + static_cast<double>(_timer->getRealTime() - dtDraw))) / loop;
+					//avgDraw = ((avgDraw*(loop - 1) + static_cast<double>(_timer->getRealTime() - dtDraw))) / loop;
 					/*if ((static_cast<int>(loop) % 60) == 0)
 						std::cerr << "Draw time: " << avgDraw << "ms" << std::endl << "evolve time: " << avgEvolve << std::endl;*/
 					

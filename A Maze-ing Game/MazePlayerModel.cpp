@@ -22,8 +22,8 @@ namespace amazeinggame
 		float distanceToStopBeforeWall = 0.1;
 		MovementState movementState = MovementState::MoveStraight;
 		float currentSpeed = 0;
-		float typicalSpeed = 5;
-		float angularSpeed = 720;
+		float typicalSpeed = 4;
+		float angularSpeed = 440;
 		maze::Direction movementDirection = maze::Direction::North;
 		float remainingAngle = 0;
 		float currentAngle = 0;
