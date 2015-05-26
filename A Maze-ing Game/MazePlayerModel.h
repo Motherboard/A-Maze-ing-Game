@@ -1,7 +1,11 @@
 #pragma once
 #include <memory>
-//#include "CMaze.h"
 #include <string>
+
+
+//The CMazePlayerModel is responsible for holding the state of a player (human or AI)
+//and evolve it in the world according to it's controller's commands and the interaction with the world
+//The player model calls the update() method of it's controller to get instructions.
 
 namespace maze {
 	enum class Direction;
@@ -15,6 +19,7 @@ namespace amazeinggame
 	class CMazePlayerHumanController;
 	class CMazeGameWorldModel;
 
+	//This is the player state. In a multi-threaded setting this structure would exist in shared memory, and be time stamped
 	struct CMazePlayerState
 	{
 		float x, y, speedX, speedY, currentAngle, angularSpeed, remainingAngle;

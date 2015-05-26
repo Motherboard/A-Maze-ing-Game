@@ -48,6 +48,7 @@ namespace irr
 					throw std::exception("Failed initializing window");
 				}
 			}
+			_device->setWindowCaption(L"A-Maze-ing Game");
 			_videoDriver = _device->getVideoDriver();
 			_sceneManager = _device->getSceneManager();
 			_guiEnvironment = _device->getGUIEnvironment();

@@ -1,6 +1,9 @@
 #pragma once
 #include "IEventReceiver.h"
 
+//This is the event reciever that gets activated when the game egine is in menu mode
+//It holds the GUI logic
+
 namespace amazeinggame
 {
 	class CMazeGameEngine;

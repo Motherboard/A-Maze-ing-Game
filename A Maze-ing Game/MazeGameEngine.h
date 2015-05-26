@@ -10,6 +10,10 @@
 #include "menuEventReciever.h"
 #include "MazeGameMenu.h"
 
+//CMazeGameEngine is the main class that of the game
+//It holds the world model, initialized it, connects it to the world view classes, renders the views, and evolves the 
+//world and the views.
+
 namespace irr
 {
 	namespace scene
@@ -42,18 +46,33 @@ namespace amazeinggame
 	public:
 		CMazeGameEngine();
 		~CMazeGameEngine();
+		//Initialize the world (maze and players) Although the world can support more than one human player, the engine currently
+		//limits it to just one, no split screen interface or networking support yet.
 		void initWorld(unsigned char in_width, unsigned char in_length, unsigned char numOfAIPlayers, unsigned char in_AIDifficultyLevel);
+		//Build the scenegraph according to the world, assign controllers to the players models of the world, assign views to the player models.
+		//and start the orientation scene.
 		void setupWorld() final;
+		//reset the resolution of the game
 		void setResulotion(unsigned int in_width, unsigned int in_height);
+		//show the main menu
 		void showMenu();
+		//hide the main menu
 		void hideMenu();
+		//zoom camera out
 		void cameraZoomOut();
+		//zoom camera in
 		void cameraZoomIn();
+		//move camera, the input is the ammount to move in each direction
 		void cameraPan(float in_dx, float in_dy);
+		//set camera target position
 		void setCameraTargetCoordinates(float in_x, float in_y);
+		//set camera target player view
 		void setCameraTargetPlayer(CMazePlayerView &in_sceneNodeToFollow);
+		//quit the game
 		void quit();
+		//returns true if the world is initialized and the game was not won (by human or AI)
 		bool isGameOngoing();
+		//holds the menu item (for easy access to the selected preferences)
 		CMazeGameMenu menu;
 	private:
 		void evolveWorld() final;

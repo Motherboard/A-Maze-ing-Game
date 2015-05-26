@@ -4,7 +4,8 @@
 #include "MazePlayerModel.h"
 #include <vector>
 
-
+//This class holds the game world model and the player models.
+//It calls their evolve methods, and determines who wins.
 
 namespace amazeinggame
 {

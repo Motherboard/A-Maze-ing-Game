@@ -107,6 +107,7 @@ void CMazePlayerView::startDropDeadAnimation()
 irr::scene::IAnimatedMeshSceneNode * CMazePlayerView::addSceneNode(const CMazePlayerModel & in_mazePlayer, irr::scene::ISceneManager * const in_sceneManager, irr::scene::ISceneNode * const in_parent)
 {
 	_playerModel = &in_mazePlayer;
+	_sceneManager = in_sceneManager;
 	irr::scene::IAnimatedMesh * ninjaMesh = in_sceneManager->getMesh("../media/ninja.b3d");
 	auto playerState = _playerModel->getPlayerState();
 	_playerSceneNode = in_sceneManager->addAnimatedMeshSceneNode(ninjaMesh, in_parent, -1, 
@@ -144,9 +145,21 @@ void CMazePlayerView::update(float in_deltaT)
 	}
 }
 
-void CMazePlayerView::setTexture(irr::video::ITexture * in_texture)
+void CMazePlayerView::setColor(PlayerViewColor in_color)
 {
-	_playerSceneNode->getMaterial(0).setTexture(0, in_texture);
+	irr::video::ITexture *texture = nullptr;
+	switch (in_color)
+	{
+	case PlayerViewColor::Blue:
+		texture = _sceneManager->getVideoDriver()->getTexture("../media/nskinbl.jpg");
+		break;
+	case PlayerViewColor::Red:
+		texture = _sceneManager->getVideoDriver()->getTexture("../media/nskinrd.jpg");
+		break;
+	default:
+		break;
+	}
+	_playerSceneNode->getMaterial(0).setTexture(0, texture);
 }
 
 const irr::scene::IAnimatedMeshSceneNode * CMazePlayerView::getSceneNode() const

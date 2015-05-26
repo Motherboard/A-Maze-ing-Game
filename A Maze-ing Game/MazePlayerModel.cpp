@@ -219,6 +219,7 @@ namespace amazeinggame
 	{
 		if (_pInnerData->movementQueue.size())
 		{
+			stop();
 			setDirection(_pInnerData->movementQueue.front());
 			_pInnerData->movementQueue.pop_front();
 			return true;

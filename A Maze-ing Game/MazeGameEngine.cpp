@@ -219,13 +219,12 @@ namespace amazeinggame
 			_gameEventReciever.setPlayerController(_worldModel.getHumanPlayer(0).getMazePlayerHumanController());
 		}
 		const auto numOfAIPlayers = _worldModel.getNumOfAIPlayers();
-		auto textureForAIPlayer = _videoDriver->getTexture("../media/nskinrd.jpg");
 		for (auto i = 0; i < numOfAIPlayers; ++i)
 		{
 			_playerViews.emplace_back();
 			auto & AIPlayerView = _playerViews.back();
 			AIPlayerView.addSceneNode(_worldModel.getAIPlayer(i), _sceneManager, _mazeRootSceneNode);
-			AIPlayerView.setTexture(textureForAIPlayer);
+			AIPlayerView.setColor(CMazePlayerView::PlayerViewColor::Red);
 		}
 	}
 

@@ -5,6 +5,12 @@
 #include <stack>
 #include <memory>
 
+//This file holds the CMaze class, the CMaze class is responsible to generate a minimal spanning tree for a 2d graph of
+//a run-time determined size.
+//It can also return all equidistant points from a given point in the maze, as well as the available directions from 
+//a given point in the maze.
+
+
 namespace maze
 {
 	
@@ -16,6 +22,7 @@ namespace maze
 	};
 	typedef std::forward_list<ConnectedWallSection> listOfWalls_t;
 
+	//north is positive y, south is negative y, west is negative x, east is positive x
 	enum class Direction { North, South, East, West, NotSet};
 
 	std::ostream & operator << (std::ostream &, Direction);
@@ -23,23 +30,32 @@ namespace maze
 	std::pair<int, int> getVectorFromDirection(Direction direction);
 	Direction getDirectionFromVector(float x, float y);
 
+	//the main class
+
 	class CMaze
 	{
 	public:
 		CMaze(unsigned int in_width, unsigned int in_length);
 		CMaze() = default;
 		void generateMaze(unsigned int in_width, unsigned int in_height);
+		//get list of the maze walls, continous sections of cell walls are merged into one wall "line"
 		listOfWalls_t getMazeWalls() const;
+		//returns all valid directions for a given position.
 		std::vector<Direction> getAllPossibleDirectionsFromPosition(unsigned int x, unsigned int y) const;
+		//return all equidistant coordinated (in L1) from a given position
 		std::vector<std::pair<int, int>> getAllEquidistantPositionsFromPosition(unsigned int x, unsigned int y, unsigned int distance) const;
+		//check if a direction is valid from this position (i.e. if it is not bounded by a wall)
 		bool isDirectionAllowedFromPosition(unsigned int x, unsigned int y, Direction direction) const;
 	private:
 		struct Cell;
 		struct Wall;
-		//for debuging purposes:
+		//for debuging purposes, draw the maze in textual form
 		void drawMaze() const;
+		//also for debuging, report possible exits from a given position
 		void showPossibleExits(unsigned int x, unsigned int y);
+		//when removing a wall between to cells while creating the maze we unite the two cell's groups.
 		void JoinCellGroups(Cell &in_oneCell, Cell &in_otherCell);
+		//return the cell position in the _mazeCells vector according to it's position
 		size_t getCellIdxFromPosition(unsigned int x, unsigned int y) const;
 		
 		unsigned int _width, _length; //number of cells in the x and y axis respectively

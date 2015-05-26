@@ -3,6 +3,9 @@
 #include "IEventReceiver.h"
 
 
+//This event reciever is responsible for controlling a human player using the arrow keys, as well as bringing up the menu
+//if one presses Esc. or any key after losing.
+
 namespace amazeinggame
 {
 
