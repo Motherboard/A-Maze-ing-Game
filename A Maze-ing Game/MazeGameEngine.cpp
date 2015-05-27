@@ -5,6 +5,8 @@
 #include <algorithm>
 #include "CBatchingMesh.h"
 #include <random>
+#include <chrono>
+#include <thread>
 #include "easylogging++.h"
 
 namespace amazeinggame
@@ -242,6 +244,8 @@ namespace amazeinggame
 
 	void CMazeGameEngine::setupWorld()
 	{
+		isWinScreenShowing = false;
+		_endGameImg->setVisible(false);
 		_sceneManager->clear();
 		_videoDriver->setFog(irr::video::SColor(0, 30, 20, 10), irr::video::EFT_FOG_LINEAR, 3, 10, .03f, true, false);
 		buildMaze();
@@ -255,8 +259,12 @@ namespace amazeinggame
 
 	void CMazeGameEngine::evolveWorld()
 	{
-		if (menu.isMenuShowing() || !_worldModel.isWorldInitialized())
+		if (_isNextLevelRequested)
 		{
+			startNextLevel();
+		}
+		if (menu.isMenuShowing() || !_worldModel.isWorldInitialized())
+		{ //world is not initialized yet, or menu is showing - no need to evolve.
 			return;
 		}
 		float deltaT = getTimeFromPreviousFrame();
@@ -274,7 +282,7 @@ namespace amazeinggame
 		for (auto & playerView : _playerViews)
 			playerView.update(0);
 		_camera.evolve(deltaT);
-		if (_worldModel.isMazeGameWon())
+		if (_worldModel.isMazeGameWon() && !isWinScreenShowing)
 		{
 			showWinScreen();
 		}
@@ -282,27 +290,38 @@ namespace amazeinggame
 
 	void CMazeGameEngine::showWinScreen()
 	{
-		if (!isWinScreenShowing)
+		if (isWinScreenShowing)
+			return;
+		if (isHumanPlayerTheWinner()) //it's the player
 		{
-			if (_worldModel.getMazeWinnerIdx() == 0) //it's the player
+			if (!_winScreen)
 			{
-				if (!_winScreen)
-				{
-					_winScreen = _videoDriver->getTexture("../media/winner.jpg");
-				}
-				_endGameImg->setImage(_winScreen);
+				_winScreen = _videoDriver->getTexture("../media/winner.jpg");
 			}
-			else //it's the AI
-			{
-				if (!_loseScreen)
-				{
-					_loseScreen = _videoDriver->getTexture("../media/failed.png");
-				}
-				_endGameImg->setImage(_loseScreen);
-			}
-			_endGameImg->setVisible(true);
-			isWinScreenShowing = true;
+			_endGameImg->setImage(_winScreen);
 		}
+		else //it's the AI
+		{
+			if (!_loseScreen)
+			{
+				_loseScreen = _videoDriver->getTexture("../media/failed.png");
+			}
+			_endGameImg->setImage(_loseScreen);
+		}
+		_endGameImg->setVisible(true);
+		isWinScreenShowing = true;
+		auto helperHelperThread = std::thread([&](){
+			std::this_thread::sleep_for(std::chrono::seconds(2));
+			if (isHumanPlayerTheWinner())
+			{ //if the player wins, start another game
+				requestNextLevel();
+			}
+			else
+			{ //if he lost show the menu
+				showMenu();
+			}
+		});
+		helperHelperThread.detach();
 	}
 
 	void CMazeGameEngine::setResulotion(unsigned int in_width, unsigned int in_height)
@@ -357,9 +376,42 @@ namespace amazeinggame
 		_device->closeDevice();
 	}
 
-	bool CMazeGameEngine::isGameOngoing()
+	bool CMazeGameEngine::isGameOngoing() const
 	{
 		return (!_worldModel.isMazeGameWon() && _worldModel.isWorldInitialized());
 	}
 
+	bool CMazeGameEngine::isHumanPlayerTheWinner() const
+	{
+		if (!_worldModel.isMazeGameWon())
+		{
+			return false;
+		}
+		if (_worldModel.getMazeWinnerIdx() == 0)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	bool CMazeGameEngine::isGameWorldInitialized() const
+	{
+		return _worldModel.isWorldInitialized();
+	}
+
+	void CMazeGameEngine::startNextLevel()
+	{
+		//TODO: increase level difficulty
+		_isNextLevelRequested = false;
+		auto mazeDimensions = menu.getChosenMazeDimensions();
+		initWorld(mazeDimensions.first, mazeDimensions.second,
+			menu.getChosenNumOfAIPlayers(),
+			menu.getChosenAIDifficultyLevel());
+		setupWorld();
+	}
+
+	void CMazeGameEngine::requestNextLevel()
+	{
+		_isNextLevelRequested = true;
+	}
 }

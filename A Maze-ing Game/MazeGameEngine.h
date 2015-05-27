@@ -71,7 +71,12 @@ namespace amazeinggame
 		//quit the game
 		void quit();
 		//returns true if the world is initialized and the game was not won (by human or AI)
-		bool isGameOngoing();
+		bool isGameOngoing() const;
+		//returns true if the human player won
+		bool isHumanPlayerTheWinner() const;
+		//returns true if the world has been initialized
+		bool isGameWorldInitialized() const;
+		void requestNextLevel();
 		//holds the menu item (for easy access to the selected preferences)
 		CMazeGameMenu menu;
 	private:
@@ -84,6 +89,7 @@ namespace amazeinggame
 		void setupCamera();
 		void setupPlayerViews();
 		void startOrientationScene();
+		void startNextLevel();
 		bool isWinScreenShowing = false;
 		float _width, _length;
 		std::vector<CMazePlayerView> _playerViews;
@@ -99,6 +105,7 @@ namespace amazeinggame
 		CMenuEventReciever _menuEventReciever;
 		irr::gui::IGUIImage *_endGameImg = nullptr;
 		irr::gui::IGUIImage * _introScreen = nullptr;
+		bool _isNextLevelRequested = false;
 		//irr::extra::irr_ptr<irr::scene::IMetaTriangleSelector *> _mazeTriangleSelector;
 	};
 

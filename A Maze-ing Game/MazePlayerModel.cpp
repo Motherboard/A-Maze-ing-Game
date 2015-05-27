@@ -179,7 +179,7 @@ namespace amazeinggame
 			shouldStop = true;
 			_pInnerData->distanceWalkedFromLastTurn = 0;
 		}
-		else if ((newDistanceFromLastTurn > 1) && _pInnerData->isStopRequested && (newDistanceFromCellCenterEdge >= 0))
+		else if ((newDistanceFromLastTurn >= 1) && _pInnerData->isStopRequested && (newDistanceFromCellCenterEdge >= -0.1))
 		{ //if there are turns waiting to be taken, we can take them at this point
 			movementVector = movementVector.normalize() * (std::ceil(_pInnerData->distanceWalkedFromLastTurn) - _pInnerData->distanceWalkedFromLastTurn);
 			shouldStop = true;
@@ -219,7 +219,6 @@ namespace amazeinggame
 	{
 		if (_pInnerData->movementQueue.size())
 		{
-			stop();
 			setDirection(_pInnerData->movementQueue.front());
 			_pInnerData->movementQueue.pop_front();
 			return true;

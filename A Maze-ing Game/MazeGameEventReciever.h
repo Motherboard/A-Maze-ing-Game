@@ -23,6 +23,10 @@ namespace amazeinggame
 	private:
 		CMazeGameEngine * const _parentGameEngine = nullptr;
 		CMazePlayerHumanController * _playerController = nullptr;
+		//This flag is used to determine if a helper thread was started, and we should wait for it to finish it's job
+		//The helper thread should reset the flag once it's done (we don't care if we lose some events due to racing 
+		//conditions, so no need for locks
+		bool _isActionPending = false;
 	};
 
 }

@@ -28,12 +28,15 @@ bool CMazeGameEventReciever::OnEvent(const irr::SEvent& event)
 {
 	if (event.EventType == irr::EET_KEY_INPUT_EVENT)
 	{
-		if (!_parentGameEngine->isGameOngoing())
+		if (_isActionPending)
+			return false;
+		
+		if (!_parentGameEngine->isGameWorldInitialized())
 		{
-			_sleep(1000);
-			_parentGameEngine->showMenu();
+			_parentGameEngine->showMenu();// if the world is not initialized, show the menu
 			return true;
 		}
+		
 		switch (event.KeyInput.Key)
 		{
 			if (_playerController)
