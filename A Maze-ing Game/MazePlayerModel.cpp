@@ -76,7 +76,7 @@ namespace amazeinggame
 			if (_pInnerData->currentSpeed > 0)
 			{ //if we're already moving, complete the move - and only than change direction.
 				if (_pInnerData->movementQueue.size() > 0)
-				{
+				{ //if there is something in the queue, check to see if the new direction is different than the last one.
 					if (_pInnerData->movementQueue.back() != in_newDirection)
 					{ //only place the new direction in queue if it is unique.
 						if (_pInnerData->movementQueue.size() > _pInnerData->_desiredMovementQueueSize) //forget about the earliest movement requests - the player has changed his mind.
@@ -84,7 +84,16 @@ namespace amazeinggame
 							_pInnerData->movementQueue.pop_front(); //the movement the player would take once he's finished moving
 						}
 					}
+					else
+					{	
+						return; //if in_newDirection is not unique, don't add it
+					}
 				}
+				else if (in_newDirection == _pInnerData->movementDirection) //if the queue is empty, and the "new direction" is not new at all - dont add it
+				{
+					return;
+				}
+				stop(); //make sure that the player model is notified of a stop so it would check the queue.
 				_pInnerData->movementQueue.push_back(in_newDirection); //and the next movement to execute.
 				return;
 			}
